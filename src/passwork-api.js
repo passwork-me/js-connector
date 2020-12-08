@@ -14,10 +14,12 @@ const restModules = [
  */
 module.exports = function (host) {
     const _options = {
-        host:              host,
-        token:             '',
-        masterPassword:    false,
-        useMasterPassword: false
+        host: host,
+        token: '',
+        masterPassword: false,
+        useMasterPassword: false,
+        debug: false
+
     };
 
     const request = new agent(_options).request;

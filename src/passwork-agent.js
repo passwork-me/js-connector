@@ -12,7 +12,9 @@ module.exports = function (options) {
     }
 
     this.request = (endpoint, method, body) => new Promise((resolve, reject) => {
-        console.log(method + ': ' + options.host + endpoint);
+        if(options.debug)
+            console.log(method + ': ' + options.host + endpoint);
+
         _method[method](options.host + endpoint)
             .send(body)
             .set('Passwork-Auth', options.token)
