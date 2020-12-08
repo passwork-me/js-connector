@@ -10,6 +10,9 @@ npm install
 ```
 
 #### API Key
+
+![alt text](./passwork.png)
+
 - Sign in to your Passwork
 - Menu → API Settings
 - Enter your authorization key and generate the API Key
