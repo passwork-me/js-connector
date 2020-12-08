@@ -5,7 +5,7 @@ The Passwork API lets you retrieve, create, update passwords, folders and vaults
 
 #### How to install
 ```shell script
-git clone git@github.com:passwork-me/js-connector.git .
+git clone https://github.com/passwork-me/js-connector.git .
 npm install
 ```
 
