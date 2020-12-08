@@ -29,6 +29,7 @@ Check for all available methods in
 #### Open session
 
 ```JS
+const Passwork = require('./src/passwork-api');
 /** @type PassworkAPI */
 const passwork = new Passwork("https://passwork/api/v4");
 (async () => {
@@ -48,6 +49,7 @@ So you can perform multiple actions within one session without executing `login`
 Get password by ID
 
 ```JS
+const Passwork = require('./src/passwork-api');
 const passwork = new Passwork("https://passwork/api/v4");
 (async () => {
     await passwork.login("api-key", "master password");
