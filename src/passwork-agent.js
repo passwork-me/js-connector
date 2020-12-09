@@ -12,7 +12,7 @@ module.exports = function (options) {
     }
 
     this.request = (endpoint, method, body) => new Promise((resolve, reject) => {
-        if(options.debug)
+        if (options.debug)
             console.log(method + ': ' + options.host + endpoint);
 
         _method[method](options.host + endpoint)
@@ -24,7 +24,14 @@ module.exports = function (options) {
     });
 
     for (const key in _method) {
-        this.request[key.toLowerCase()] = (endpoint, body, success, error) =>
-            this.request(endpoint, key, body, success, error).catch(e => console.error(e.response.body));
+        this.request[key.toLowerCase()] = (endpoint, body) =>
+            this.request(endpoint, key, body)
+                .catch(e => {
+                    throw {
+                        httpStatus:  e.status,
+                        httpMessage: e.message,
+                        ...e.response.body
+                    };
+                });
     }
 };
