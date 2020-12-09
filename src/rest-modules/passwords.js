@@ -81,13 +81,21 @@ module.exports = function (options, request, api) {
         if (fields.hasOwnProperty('attachments')) {
             fields.attachments = passworkLib.formatAttachments(fields.attachments, vault);
         }
+        fields.snapshot = makeSnapshot(password, vault);
+
         data = {...data, ...fields};
 
         return request.put(`/passwords/${passwordId}`, data);
     };
 
-    api.deletePassword = (passwordId) =>
-        request.delete(`/passwords/${passwordId}`);
+    api.deletePassword = async (passwordId) => {
+        let password = await request.get(`/passwords/${passwordId}`);
+        let vault = await api.getVault(password.vaultId);
+
+        return request.delete(`/passwords/${passwordId}`, {
+            snapshot: makeSnapshot(password, vault)
+        });
+    };
 
     api.addPasswordAttachment = async (passwordId, attachmentPath, attachmentName = null) => {
         let password = await api.getPassword(passwordId);
@@ -125,5 +133,28 @@ module.exports = function (options, request, api) {
             }
         }
         return request.post(`/passwords/${passwordId}/${action}`, data);
+    }
+
+    function makeSnapshot(password, vault) {
+        let vaultPass = passworkLib.getVaultMaster(vault)
+        let sData = {...password};
+        enrichPassword(password, vault);
+        enrichCustoms(password, vault);
+
+        sData.password = password.getPassword();
+        sData.custom = password.getCustoms();
+        sData.groupId = sData.vaultId;
+        if(sData.attachments) {
+            sData.attachments = sData.attachments.map(function (att) {
+                return {id: att.id, name: att.name, key: cryptoInterface.decode(att.encryptedKey, vaultPass)};
+            });
+        }
+        delete sData.cryptedPassword;
+        delete sData.updatedAt;
+        delete sData.vaultId;
+
+        sData = JSON.stringify(sData);
+        sData = cryptoInterface.encode(sData, vaultPass);
+        return sData;
     }
 };

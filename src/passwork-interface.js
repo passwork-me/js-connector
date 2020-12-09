@@ -77,7 +77,6 @@ PassworkAPI.prototype.searchPasswords = (query, tags = [], colors = [], vaultId 
  * @param {{
  *   color: string|null,
  *   folderId: string|null,
- *   snapshot: null,
  *   tags: string[],
  *   custom: [
  *      {
@@ -112,7 +111,6 @@ PassworkAPI.prototype.addPassword = (
  *   login: string|null,
  *   password: string|null,
  *   color: string|null,
- *   snapshot: null,
  *   tags: string[],
  *   custom: [
  *      {
