@@ -12,15 +12,21 @@ module.exports = function (options) {
     }
 
     this.request = (endpoint, method, body) => new Promise((resolve, reject) => {
-        if (options.debug)
-            console.log(method + ': ' + options.host + endpoint);
+        let requestUrl = method + ': ' + options.host + endpoint;
+        if (options.debug) {
+            console.log(requestUrl);
+        }
+
 
         _method[method](options.host + endpoint)
             .send(body)
             .set('Passwork-Auth', options.token)
             .set('Passwork-MasterHash', cryptoInterface.hash(options.masterPassword))
             .then(res => resolve(res.body.data))
-            .catch(err => reject(err))
+            .catch(err => {
+                err.endpoint = requestUrl;
+                return reject(err);
+            })
     });
 
     for (const key in _method) {
@@ -28,6 +34,7 @@ module.exports = function (options) {
             this.request(endpoint, key, body)
                 .catch(e => {
                     throw {
+                        httpRequest: e.endpoint,
                         httpStatus:  e.status,
                         httpMessage: e.message,
                         ...e.response.body
