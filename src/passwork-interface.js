@@ -32,11 +32,18 @@ PassworkAPI.prototype.logout = () => throw new Error('not implemented');
 PassworkAPI.prototype.getPasswords = (vaultId = null, folderId = null) => throw new Error('not implemented');
 
 /**
- * Get recent
+ * Get recently viewed passwords
  * @see GET: /passwords/recent
  * @return {Promise}
  */
 PassworkAPI.prototype.getRecentPasswords = () => throw new Error('not implemented');
+
+/**
+ * Get favorite passwords
+ * @see GET: /passwords/favorite
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getFavoritePasswords = () => throw new Error('not implemented');
 
 /**
  * Get password by ID
@@ -208,6 +215,20 @@ PassworkAPI.prototype.getVaultFullInfo = (vaultId) => throw new Error('not imple
  * @return {Promise}
  */
 PassworkAPI.prototype.getVaultFolders = (vaultId) => throw new Error('not implemented');
+
+/**
+ * Get all tags
+ * @see GET: /vaults/tags
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getTags = () => throw new Error('not implemented');
+
+/**
+ * Get all color tags
+ * @see GET: /vaults/colors
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getColors = () => throw new Error('not implemented');
 
 /**
  * Get vault tags

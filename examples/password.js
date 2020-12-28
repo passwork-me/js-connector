@@ -11,6 +11,9 @@ module.exports = {
         let recent = await passwork.getRecentPasswords();
         console.log('Recent: ', recent);
 
+        let favorite = await passwork.getFavoritePasswords();
+        console.log('Favorite: ', favorite);
+
         let searchResult = await passwork.searchPasswords('pass');
         console.log('Search results: ', searchResult);
 

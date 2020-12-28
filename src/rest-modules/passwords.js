@@ -42,6 +42,8 @@ module.exports = function (options, request, api) {
 
     api.getRecentPasswords = () => request.get("/passwords/recent");
 
+    api.getFavoritePasswords = () => request.get("/passwords/favorite");
+
     api.searchPasswords = (query, tags = [], colors = [], vaultId = null) =>
         request.post('/passwords/search', {query, tags, colors, vaultId});
 

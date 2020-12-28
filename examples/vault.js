@@ -17,11 +17,17 @@ module.exports = {
         let fullInfo = await passwork.getVaultFullInfo(env.EXAMPLE_VAULT);
         console.log('Vault Full Info: ', fullInfo);
 
-        let tags = await passwork.getVaultTags(env.EXAMPLE_VAULT)
-        console.log('Vault Tags: ', tags);
+        let tags = await passwork.getTags()
+        console.log('All Tags: ', tags);
 
-        let colors = await passwork.getVaultColors(env.EXAMPLE_VAULT);
-        console.log('Vault Colors: ', colors);
+        let colors = await passwork.getColors();
+        console.log('All Colors: ', colors);
+
+        let vaultTags = await passwork.getVaultTags(env.EXAMPLE_VAULT)
+        console.log('Vault Tags: ', vaultTags);
+
+        let vaultColors = await passwork.getVaultColors(env.EXAMPLE_VAULT);
+        console.log('Vault Colors: ', vaultColors);
 
         let newVaultId = await passwork.addVault('New API Vault', false);
         console.log('Created Vault: ', newVaultId);
