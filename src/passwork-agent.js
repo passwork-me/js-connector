@@ -20,6 +20,7 @@ module.exports = function (options) {
 
         _method[method](options.host + endpoint)
             .send(body)
+            // .withCredentials()
             .set('Passwork-Auth', options.token)
             .set('Passwork-MasterHash', cryptoInterface.hash(options.masterPassword))
             .then(res => resolve(res.body.data))

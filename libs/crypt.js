@@ -12,17 +12,15 @@ module.exports = {
     'JSEncrypt' : JSEncrypt,
     'rsa' : new JSEncrypt(),
 
+    base32: function () {
+        return typeof window !== 'undefined' ? window.base32 : base32;
+    },
 
     encode: function (data, cryptoPassword) {
-        return base32.encode(CryptoJS.AES.encrypt(data, cryptoPassword).toString());
+        return this.base32().encode(CryptoJS.AES.encrypt(data, cryptoPassword).toString());
     },
     decode: function (data, cryptoPassword) {
-        try {
-            return  CryptoJS.AES.decrypt(base32.decode(data), cryptoPassword).toString(CryptoJS.enc.Utf8);
-        }
-        catch (e) {
-            return null;
-        }
+        return CryptoJS.AES.decrypt(this.base32().decode(data), cryptoPassword).toString(CryptoJS.enc.Utf8);
     },
     generateRsaKeys: function (masterPassword, callback) {
         let self = this;

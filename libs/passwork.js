@@ -1,5 +1,5 @@
 const cryptoInterface = require("./crypt");
-const fs = require("fs");
+const fs = typeof module !== 'undefined' ? require("fs") : require('./fs-web');
 const pathMod = require('path');
 
 module.exports = options => {
@@ -95,12 +95,15 @@ module.exports = options => {
                 if (!path) {
                     continue;
                 }
-                let data = self.encryptPasswordAttachment(fs.readFileSync(path), vault)
-                data.name = !name ? pathMod.basename(path) : name;
-                result.push(data);
+                try {
+                    let data = self.encryptPasswordAttachment(fs.readFileSync(path), vault);
+                    data.name = !name ? pathMod.basename(path) : name;
+                    result.push(data);
+                } catch (e) {
+                }
             }
             return result;
-        }
+        },
     }
 
     return self;

@@ -1,10 +1,11 @@
 const cryptoInterface = require("../../libs/crypt");
-const fs = require("fs");
+const fs = typeof module !== 'undefined' ? require("fs") : require('../../libs/fs-web');
 const path = require('path');
 
 
 module.exports = function (options, request, api) {
     const passworkLib = require("../../libs/passwork")(options);
+    const canReadFs = typeof module !== 'undefined'
 
     const enrichPassword = (password, vault) => {
         password.getPassword = () => passworkLib.decryptString(password.cryptedPassword, vault);
@@ -62,7 +63,7 @@ module.exports = function (options, request, api) {
         if (additionalFields.hasOwnProperty('custom') && additionalFields.custom.length > 0) {
             additionalFields.custom = passworkLib.encryptCustoms(additionalFields.custom, vault);
         }
-        if (additionalFields.hasOwnProperty('attachments') && additionalFields.attachments.length > 0) {
+        if (canReadFs && additionalFields.hasOwnProperty('attachments') && additionalFields.attachments.length > 0) {
             additionalFields.attachments = passworkLib.formatAttachments(additionalFields.attachments, vault);
         }
         data = {...data, ...additionalFields};
@@ -80,7 +81,7 @@ module.exports = function (options, request, api) {
         if (fields.hasOwnProperty('custom') && additionalFields.custom.length > 0) {
             fields.custom = passworkLib.encryptCustoms(fields.custom, vault);
         }
-        if (fields.hasOwnProperty('attachments')) {
+        if (canReadFs && fields.hasOwnProperty('attachments')) {
             fields.attachments = passworkLib.formatAttachments(fields.attachments, vault);
         }
         fields.snapshot = makeSnapshot(password, vault);
@@ -100,6 +101,9 @@ module.exports = function (options, request, api) {
     };
 
     api.addPasswordAttachment = async (passwordId, attachmentPath, attachmentName = null) => {
+        if (!canReadFs) {
+            throw 'Not implemented for web version';
+        }
         let password = await api.getPassword(passwordId);
         let vault = await api.getVault(password.vaultId);
         let data = passworkLib.encryptPasswordAttachment(fs.readFileSync(attachmentPath), vault)

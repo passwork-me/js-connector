@@ -7,8 +7,7 @@ const restModules = [
     require("./rest-modules/folders")
 ];
 
-/***
- *
+/**
  * @param host
  * @implements PassworkAPI
  */
