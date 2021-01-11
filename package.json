@@ -12,8 +12,8 @@
     "superagent": "^5.2.2"
   },
   "scripts": {
-    "watch": "parcel watch src/web/passwork-web.js --no-hmr",
-    "build": "parcel build src/web/passwork-web.js"
+    "watch": "parcel watch web/src/passwork-web-api.js --no-hmr -d web/dist",
+    "build": "parcel build web/src/passwork-web-api.js -d web/dist"
   },
   "devDependencies": {
     "basic-ftp": "^4.6.3",

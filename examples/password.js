@@ -47,7 +47,7 @@ async function passwordExamples (passwork, env)  {
     });
     console.log('Edited password: ', password);
 
-    if (typeof module !== 'undefined') {
+    try {
         let addAttachment = await passwork.addPasswordAttachment(password.id, './example-attachment.png');
         console.log(addAttachment);
 
@@ -57,6 +57,8 @@ async function passwordExamples (passwork, env)  {
 
         let delAttachment = await passwork.deletePasswordAttachment(password.id, attachmentId);
         console.log(delAttachment);
+    } catch (e) {
+        console.log(e);
     }
 
     let copiedId = await passwork.copyPassword(password.id, env.EXAMPLE_VAULT);
