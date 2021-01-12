@@ -2,7 +2,8 @@ const restModules = [
     require("./rest-modules/passwords"),
     require("./rest-modules/users"),
     require("./rest-modules/vaults"),
-    require("./rest-modules/folders")
+    require("./rest-modules/folders"),
+    require("./rest-modules/info"),
 ];
 
 /**

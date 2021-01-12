@@ -351,3 +351,12 @@ PassworkAPI.prototype.moveFolder = (folderId, vaultTo, folderTo = null) => throw
  * @return {Promise}
  */
 PassworkAPI.prototype.copyFolder = (folderId, vaultTo, folderTo = null) => throw new Error('not implemented');
+
+/**
+ * Get activity report for selected period
+ * @see POST: /info/activity-report
+ * @param {string} dateFrom - 2020-12-01
+ * @param {string|null} dateTo - 2020-12-31
+ * @return {Promise}
+ */
+PassworkAPI.prototype.activityReport = (dateFrom, dateTo = null) => throw new Error('not implemented');
