@@ -33,7 +33,8 @@ const Passwork = require('./src/passwork-api');
 /** @type PassworkAPI */
 const passwork = new Passwork("https://passwork/api/v4");
 (async () => {
-    await passwork.login("api-key", "master password");
+    await passwork.login("api-key");
+    // or await passwork.login("api-key", "master password"); if you are using a client side encryption 
 
     // do what you need here
 
