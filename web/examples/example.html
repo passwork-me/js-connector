@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JS Connector</title>
+</head>
+<body>
+
+
+<script src="../dist/passwork-web-api.js"></script>
+
+<script src="../../examples/vault.js"></script>
+<script src="../../examples/folder.js"></script>
+<script src="../../examples/password.js"></script>
+<script>
+    const exampleData = {
+        HOST:                        'https://passwork.loc/api/v4',
+        API_KEY:                     'rWwxHMvwIAwLKN4uKB0aND2pjbjTMMjz7H0McA70lzC8KpMAD84m5f5R6cwL',
+        USER_MASTER_PASS:            'DemoDemo',
+        EXAMPLE_VAULT:               '5fd0db90e05d6e27f46f1500',
+        EXAMPLE_FOLDER:              '5feb52ee3e42b84b1f5b14b4',
+        EXAMPLE_PASSWORD:            '5feb52e8f803f648f33911a3',
+        EXAMPLE_PASSWORD_ATTACHMENT: '5feb52e7f803f648f33911a2',
+    };
+
+    /** @type PassworkAPI */
+    let passwork = window.passwork(exampleData.HOST)
+
+    if (confirm('Do example requests?')) {
+        passwork.login(exampleData.API_KEY, exampleData.USER_MASTER_PASS).then(async () => {
+            await vaultExamples(passwork, exampleData);
+            await folderExamples(passwork, exampleData);
+            await passwordExamples(passwork, exampleData);
+        });
+    }
+</script>
+</body>
+</html>

@@ -17,6 +17,12 @@ module.exports = function (options, request, api) {
     api.getVaultFullInfo = (vaultId) =>
         request.get(`/vaults/${vaultId}/fullInfo`);
 
+    api.getTags = () =>
+        request.get(`/vaults/tags`);
+
+    api.getColors = () =>
+        request.get(`/vaults/colors`);
+
     api.getVaultTags = (vaultId) =>
         request.get(`/vaults/${vaultId}/tags`);
 

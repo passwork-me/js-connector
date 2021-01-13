@@ -1,9 +1,6 @@
 const cryptoInterface = require("../../libs/crypt");
-const fs = require("fs");
-const path = require('path');
 
-
-module.exports = function (options, request, api) {
+module.exports = function (options, request, api, {fileManager}) {
     const passworkLib = require("../../libs/passwork")(options);
 
     const enrichPassword = (password, vault) => {
@@ -11,10 +8,10 @@ module.exports = function (options, request, api) {
     }
 
     const enrichAttachment = (attachment, vault) => {
-        attachment.getData = () => passworkLib.decryptPasswordAttachment(attachment, vault)
+        attachment.getData = () => passworkLib.decryptPasswordAttachment(attachment, vault);
         attachment.saveTo = (path, name = null) => {
             let fileName = name ? name : attachment.name;
-            fs.writeFileSync(path + fileName, attachment.getData());
+            fileManager.saveToFile(path + fileName, attachment.getData());
         }
     }
 
@@ -42,6 +39,8 @@ module.exports = function (options, request, api) {
 
     api.getRecentPasswords = () => request.get("/passwords/recent");
 
+    api.getFavoritePasswords = () => request.get("/passwords/favorite");
+
     api.searchPasswords = (query, tags = [], colors = [], vaultId = null) =>
         request.post('/passwords/search', {query, tags, colors, vaultId});
 
@@ -60,8 +59,10 @@ module.exports = function (options, request, api) {
         if (additionalFields.hasOwnProperty('custom') && additionalFields.custom.length > 0) {
             additionalFields.custom = passworkLib.encryptCustoms(additionalFields.custom, vault);
         }
-        if (additionalFields.hasOwnProperty('attachments') && additionalFields.attachments.length > 0) {
-            additionalFields.attachments = passworkLib.formatAttachments(additionalFields.attachments, vault);
+        if (fileManager.canUseFs && additionalFields.hasOwnProperty('attachments') && additionalFields.attachments.length > 0) {
+            additionalFields.attachments = passworkLib.formatAttachments(additionalFields.attachments, vault, fileManager);
+        } else {
+            delete additionalFields.attachments;
         }
         data = {...data, ...additionalFields};
 
@@ -78,8 +79,10 @@ module.exports = function (options, request, api) {
         if (fields.hasOwnProperty('custom') && additionalFields.custom.length > 0) {
             fields.custom = passworkLib.encryptCustoms(fields.custom, vault);
         }
-        if (fields.hasOwnProperty('attachments')) {
-            fields.attachments = passworkLib.formatAttachments(fields.attachments, vault);
+        if (fileManager.canUseFs && fields.hasOwnProperty('attachments')) {
+            fields.attachments = passworkLib.formatAttachments(fields.attachments, vault, fileManager);
+        } else {
+            delete fields.attachments;
         }
         fields.snapshot = makeSnapshot(password, vault);
 
@@ -100,8 +103,8 @@ module.exports = function (options, request, api) {
     api.addPasswordAttachment = async (passwordId, attachmentPath, attachmentName = null) => {
         let password = await api.getPassword(passwordId);
         let vault = await api.getVault(password.vaultId);
-        let data = passworkLib.encryptPasswordAttachment(fs.readFileSync(attachmentPath), vault)
-        data.name = !attachmentName ? path.basename(attachmentPath) : attachmentName
+        let data = passworkLib.encryptPasswordAttachment(fileManager.readFile(attachmentPath), vault)
+        data.name = !attachmentName ? fileManager.getFileBasename(attachmentPath) : attachmentName
 
         return request.post(`/passwords/${passwordId}/attachment`, data);
     }
@@ -144,7 +147,7 @@ module.exports = function (options, request, api) {
         sData.password = password.getPassword();
         sData.custom = password.getCustoms();
         sData.groupId = sData.vaultId;
-        if(sData.attachments) {
+        if (sData.attachments) {
             sData.attachments = sData.attachments.map(function (att) {
                 return {id: att.id, name: att.name, key: cryptoInterface.decode(att.encryptedKey, vaultPass)};
             });

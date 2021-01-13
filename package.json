@@ -11,7 +11,12 @@
     "node-jsencrypt": "^1.0.0",
     "superagent": "^5.2.2"
   },
+  "scripts": {
+    "watch": "parcel watch web/src/passwork-web-api.js --no-hmr -d web/dist",
+    "build": "parcel build web/src/passwork-web-api.js -d web/dist"
+  },
   "devDependencies": {
-    "basic-ftp": "^4.6.3"
+    "basic-ftp": "^4.6.3",
+    "parcel-bundler": "^1.3.1"
   }
 }

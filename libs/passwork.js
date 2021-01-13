@@ -1,6 +1,4 @@
 const cryptoInterface = require("./crypt");
-const fs = require("fs");
-const pathMod = require('path');
 
 module.exports = options => {
     let self = {
@@ -89,18 +87,21 @@ module.exports = options => {
             }
             return Uint8Array.from(byteNumbers);
         },
-        formatAttachments:         (attachments, vault) => {
+        formatAttachments:         (attachments, vault, fileManager) => {
             const result = [];
             for (let {path, name} of attachments) {
                 if (!path) {
                     continue;
                 }
-                let data = self.encryptPasswordAttachment(fs.readFileSync(path), vault)
-                data.name = !name ? pathMod.basename(path) : name;
-                result.push(data);
+                try {
+                    let data = self.encryptPasswordAttachment(fileManager.readFile(path), vault);
+                    data.name = !name ? fileManager.getFileBasename(path) : name;
+                    result.push(data);
+                } catch (e) {
+                }
             }
             return result;
-        }
+        },
     }
 
     return self;

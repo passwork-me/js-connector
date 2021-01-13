@@ -32,11 +32,18 @@ PassworkAPI.prototype.logout = () => throw new Error('not implemented');
 PassworkAPI.prototype.getPasswords = (vaultId = null, folderId = null) => throw new Error('not implemented');
 
 /**
- * Get recent
+ * Get recently viewed passwords
  * @see GET: /passwords/recent
  * @return {Promise}
  */
 PassworkAPI.prototype.getRecentPasswords = () => throw new Error('not implemented');
+
+/**
+ * Get favorite passwords
+ * @see GET: /passwords/favorite
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getFavoritePasswords = () => throw new Error('not implemented');
 
 /**
  * Get password by ID
@@ -210,6 +217,20 @@ PassworkAPI.prototype.getVaultFullInfo = (vaultId) => throw new Error('not imple
 PassworkAPI.prototype.getVaultFolders = (vaultId) => throw new Error('not implemented');
 
 /**
+ * Get all tags
+ * @see GET: /vaults/tags
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getTags = () => throw new Error('not implemented');
+
+/**
+ * Get all color tags
+ * @see GET: /vaults/colors
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getColors = () => throw new Error('not implemented');
+
+/**
  * Get vault tags
  * @see GET: /vaults/{id}/tags
  * @param {string} vaultId — ID
@@ -330,3 +351,12 @@ PassworkAPI.prototype.moveFolder = (folderId, vaultTo, folderTo = null) => throw
  * @return {Promise}
  */
 PassworkAPI.prototype.copyFolder = (folderId, vaultTo, folderTo = null) => throw new Error('not implemented');
+
+/**
+ * Get activity report for selected period
+ * @see POST: /info/activity-report
+ * @param {string} dateFrom - 2020-12-01
+ * @param {string|null} dateTo - 2020-12-31
+ * @return {Promise}
+ */
+PassworkAPI.prototype.activityReport = (dateFrom, dateTo = null) => throw new Error('not implemented');
