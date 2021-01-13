@@ -53,7 +53,7 @@ Get password by ID
 const Passwork = require('./src/passwork-api');
 const passwork = new Passwork("https://passwork/api/v4");
 (async () => {
-    await passwork.login("api-key", "master password");
+    await passwork.login("api-key");
     let password = await passwork.getPassword("password-id");
     await passwork.logout();
 })();
