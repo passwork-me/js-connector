@@ -22,6 +22,13 @@ PassworkAPI.prototype.login = (apiKey, masterPassword = null) => throw new Error
 PassworkAPI.prototype.logout = () => throw new Error('not implemented');
 
 /**
+ * User info
+ * @see GET: /user/info
+ * @return {Promise}
+ */
+PassworkAPI.prototype.userInfo = () => throw new Error('not implemented');
+
+/**
  * Get passwords
  * @see GET: /vaults/{id}/passwords
  * @see GET: /folders/{id}/passwords
