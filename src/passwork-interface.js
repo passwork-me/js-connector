@@ -22,6 +22,13 @@ PassworkAPI.prototype.login = (apiKey, masterPassword = null) => throw new Error
 PassworkAPI.prototype.logout = () => throw new Error('not implemented');
 
 /**
+ * Get passwork version
+ * @see GET: /info/version
+ * @return {Promise}
+ */
+PassworkAPI.prototype.version = () => throw new Error('not implemented');
+
+/**
  * User info
  * @see GET: /user/info
  * @return {Promise}
