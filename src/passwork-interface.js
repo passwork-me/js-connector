@@ -15,6 +15,13 @@ function PassworkAPI() {
 PassworkAPI.prototype.login = (apiKey, masterPassword = null) => throw new Error('not implemented');
 
 /**
+ * Set apiToken and masterPassword directly without Login method call
+ * @param {string} apiToken
+ * @param {string|boolean} masterPassword
+ */
+PassworkAPI.prototype.setAuthOptions = (apiToken, masterPassword = false) => {};
+
+/**
  * Logout
  * @see POST: /auth/logout
  * @return {Promise}
