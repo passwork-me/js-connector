@@ -26,11 +26,11 @@ module.exports = function (host, services = null) {
     this.setAuthOptions = (apiToken, masterPass = false) => {
         _options.token = apiToken;
         if (!!masterPass) {
-            _options.masterPassword = false;
-            _options.useMasterPassword = false;
-        } else {
             _options.masterPassword = masterPass;
             _options.useMasterPassword = true;
+        } else {
+            _options.masterPassword = false;
+            _options.useMasterPassword = false;
         }
     }
 
