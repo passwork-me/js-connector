@@ -110,11 +110,15 @@ module.exports = function (options, request, api, {fileManager}) {
     }
 
     api.deletePasswordAttachment = (passwordId, attachmentId) =>
-        request.delete(`/passwords/${passwordId}/attachment/${attachmentId}`)
+        request.delete(`/passwords/${passwordId}/attachment/${attachmentId}`);
 
     api.movePassword = async (passwordId, vaultId, folderId = null) => moveCopy(false, passwordId, vaultId, folderId);
 
     api.copyPassword = async (passwordId, vaultId, folderId = null) => moveCopy(true, passwordId, vaultId, folderId);
+
+    api.favoritePassword = async (passwordId) => request.post(`/passwords/${passwordId}/favorite`);
+
+    api.unfavoritePassword = async (passwordId) => request.post(`/passwords/${passwordId}/unfavorite`);
 
     async function moveCopy(copy, passwordId, vaultTo, folderTo) {
         let action = copy ? 'copy' : 'move';

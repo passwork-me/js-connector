@@ -8,8 +8,8 @@ async function passwordExamples (passwork, env)  {
     let recent = await passwork.getRecentPasswords();
     console.log('Recent: ', recent);
 
-    let favorite = await passwork.getFavoritePasswords();
-    console.log('Favorite: ', favorite);
+    let favoriteList = await passwork.getFavoritePasswords();
+    console.log('Favorite: ', favoriteList);
 
     let searchResult = await passwork.searchPasswords('pass');
     console.log('Search results: ', searchResult);
@@ -66,6 +66,12 @@ async function passwordExamples (passwork, env)  {
 
     let movedId = await passwork.movePassword(copiedId, env.EXAMPLE_VAULT, env.EXAMPLE_FOLDER);
     console.log(movedId);
+
+    let favorite = await passwork.favoritePassword(password.id);
+    console.log(favorite);
+
+    let unfavorite = await passwork.unfavoritePassword(password.id);
+    console.log(unfavorite);
 
     let delPwd = await passwork.deletePassword(password.id);
     let delCopy = await passwork.deletePassword(movedId);

@@ -207,6 +207,22 @@ PassworkAPI.prototype.addPasswordAttachment = (passwordId, attachmentPath, attac
 PassworkAPI.prototype.deletePasswordAttachment = (passwordId, attachmentId) => throw new Error('not implemented');
 
 /**
+ * Mark password as favorite
+ * @see POST: /passwords/{id}/favorite
+ * @param {string}passwordId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.favoritePassword = (passwordId) => throw new Error('not implemented');
+
+/**
+ * Unfavorite password
+ * @see POST: /passwords/{id}/unfavorite
+ * @param {string}passwordId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.unfavoritePassword = (passwordId) => throw new Error('not implemented');
+
+/**
  * Get vaults of current user
  * @see GET: /vaults/list
  * @return {Promise}
