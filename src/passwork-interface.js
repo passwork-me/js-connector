@@ -96,6 +96,14 @@ PassworkAPI.prototype.searchPasswords = (query, tags = [], colors = [], vaultId 
     throw new Error('not implemented');
 
 /**
+ * Search passwords by URL
+ * @see POST: /passwords/searchByUrl
+ * @param {string} url
+ * @return {Promise}
+ */
+PassworkAPI.prototype.searchPasswordsByUrl = (url) => throw new Error('not implemented');
+
+/**
  * Add password
  * @see POST: /passwords
  * @param {string} vaultId

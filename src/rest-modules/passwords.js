@@ -44,6 +44,8 @@ module.exports = function (options, request, api, {fileManager}) {
     api.searchPasswords = (query, tags = [], colors = [], vaultId = null) =>
         request.post('/passwords/search', {query, tags, colors, vaultId});
 
+    api.searchPasswordsByUrl = (url) => request.post('/passwords/searchByUrl', {url});
+
     api.getAttachment = async (passwordId, attachmentId) => {
         let password = await api.getPassword(passwordId);
         let vault = await api.getVault(password.vaultId);
