@@ -23,4 +23,6 @@ module.exports = function (options, request, api) {
             }).catch(err => reject(err));
         });
     }
+
+    api.userInfo = () => request.get('/user/info')
 };

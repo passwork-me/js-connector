@@ -15,11 +15,32 @@ function PassworkAPI() {
 PassworkAPI.prototype.login = (apiKey, masterPassword = null) => throw new Error('not implemented');
 
 /**
+ * Set apiToken and masterPassword directly without Login method call
+ * @param {string} apiToken
+ * @param {string|boolean} masterPassword
+ */
+PassworkAPI.prototype.setAuthOptions = (apiToken, masterPassword = false) => {};
+
+/**
  * Logout
  * @see POST: /auth/logout
  * @return {Promise}
  */
 PassworkAPI.prototype.logout = () => throw new Error('not implemented');
+
+/**
+ * Get passwork version
+ * @see GET: /info/version
+ * @return {Promise}
+ */
+PassworkAPI.prototype.version = () => throw new Error('not implemented');
+
+/**
+ * User info
+ * @see GET: /user/info
+ * @return {Promise}
+ */
+PassworkAPI.prototype.userInfo = () => throw new Error('not implemented');
 
 /**
  * Get passwords
@@ -73,6 +94,14 @@ PassworkAPI.prototype.getAttachment = (passwordId, attachmentId) => throw new Er
  */
 PassworkAPI.prototype.searchPasswords = (query, tags = [], colors = [], vaultId = null) =>
     throw new Error('not implemented');
+
+/**
+ * Search passwords by URL
+ * @see POST: /passwords/searchByUrl
+ * @param {string} url
+ * @return {Promise}
+ */
+PassworkAPI.prototype.searchPasswordsByUrl = (url) => throw new Error('not implemented');
 
 /**
  * Add password
@@ -184,6 +213,22 @@ PassworkAPI.prototype.addPasswordAttachment = (passwordId, attachmentPath, attac
  * @return {Promise}
  */
 PassworkAPI.prototype.deletePasswordAttachment = (passwordId, attachmentId) => throw new Error('not implemented');
+
+/**
+ * Mark password as favorite
+ * @see POST: /passwords/{id}/favorite
+ * @param {string}passwordId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.favoritePassword = (passwordId) => throw new Error('not implemented');
+
+/**
+ * Unfavorite password
+ * @see POST: /passwords/{id}/unfavorite
+ * @param {string}passwordId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.unfavoritePassword = (passwordId) => throw new Error('not implemented');
 
 /**
  * Get vaults of current user

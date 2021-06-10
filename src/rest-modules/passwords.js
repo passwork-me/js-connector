@@ -44,6 +44,8 @@ module.exports = function (options, request, api, {fileManager}) {
     api.searchPasswords = (query, tags = [], colors = [], vaultId = null) =>
         request.post('/passwords/search', {query, tags, colors, vaultId});
 
+    api.searchPasswordsByUrl = (url) => request.post('/passwords/searchByUrl', {url});
+
     api.getAttachment = async (passwordId, attachmentId) => {
         let password = await api.getPassword(passwordId);
         let vault = await api.getVault(password.vaultId);
@@ -110,11 +112,15 @@ module.exports = function (options, request, api, {fileManager}) {
     }
 
     api.deletePasswordAttachment = (passwordId, attachmentId) =>
-        request.delete(`/passwords/${passwordId}/attachment/${attachmentId}`)
+        request.delete(`/passwords/${passwordId}/attachment/${attachmentId}`);
 
     api.movePassword = async (passwordId, vaultId, folderId = null) => moveCopy(false, passwordId, vaultId, folderId);
 
     api.copyPassword = async (passwordId, vaultId, folderId = null) => moveCopy(true, passwordId, vaultId, folderId);
+
+    api.favoritePassword = async (passwordId) => request.post(`/passwords/${passwordId}/favorite`);
+
+    api.unfavoritePassword = async (passwordId) => request.post(`/passwords/${passwordId}/unfavorite`);
 
     async function moveCopy(copy, passwordId, vaultTo, folderTo) {
         let action = copy ? 'copy' : 'move';

@@ -23,6 +23,17 @@ module.exports = function (host, services = null) {
         debug: false,
     };
 
+    this.setAuthOptions = (apiToken, masterPass = false) => {
+        _options.token = apiToken;
+        if (!!masterPass) {
+            _options.masterPassword = masterPass;
+            _options.useMasterPassword = true;
+        } else {
+            _options.masterPassword = false;
+            _options.useMasterPassword = false;
+        }
+    }
+
     const request = new services.agent(_options).request;
     restModules.forEach(m => new m(_options, request, this, services));
 
