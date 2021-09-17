@@ -11,6 +11,13 @@
     "node-jsencrypt": "^1.0.0",
     "superagent": "^5.2.2"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:passwork-me/js-connector.git"
+  },
+  "keywords": ["passwork"],
+  "author": "Passwork Team",
+  "license": "MIT",
   "scripts": {
     "watch": "parcel watch web/src/passwork-web-api.js --no-hmr -d web/dist",
     "build": "parcel build web/src/passwork-web-api.js -d web/dist"
