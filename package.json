@@ -5,6 +5,7 @@
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
     "crypto-js": "^4.0.0",
+    "crypto-random-string": "^3.2.0",
     "crypto-random-string-with-promisify-polyfill": "^4.0.0",
     "dotenv": "^8.2.0",
     "js-sha256": "^0.9.0",
@@ -15,7 +16,9 @@
     "type": "git",
     "url": "git@github.com:passwork-me/js-connector.git"
   },
-  "keywords": ["passwork"],
+  "keywords": [
+    "passwork"
+  ],
   "author": "Passwork Team",
   "license": "MIT",
   "scripts": {

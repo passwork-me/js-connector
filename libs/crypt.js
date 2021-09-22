@@ -1,6 +1,6 @@
 const JSEncrypt = require('node-jsencrypt');
 const CryptoJS = require('crypto-js');
-const cryptoRandomString = require('crypto-random-string-with-promisify-polyfill');
+const cryptoRandomString = require('crypto-random-string');
 const base32 = require("./base32");
 const sha256 = require('js-sha256').sha256;
 const atob = require('atob');
