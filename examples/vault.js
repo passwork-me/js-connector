@@ -14,6 +14,9 @@ async function vaultExamples(passwork, {EXAMPLE_VAULT: exampleVault}) {
     let fullInfo = await passwork.getVaultFullInfo(exampleVault);
     console.log('Vault Full Info: ', fullInfo);
 
+    let sharingInfo = await passwork.getVaultSharingInfo(exampleVault);
+    console.log('Vault Sharing Info: ', sharingInfo);
+
     let tags = await passwork.getTags()
     console.log('All Tags: ', tags);
 

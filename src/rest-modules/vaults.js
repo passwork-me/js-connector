@@ -17,6 +17,9 @@ module.exports = function (options, request, api) {
     api.getVaultFullInfo = (vaultId) =>
         request.get(`/vaults/${vaultId}/fullInfo`);
 
+    api.getVaultSharingInfo = (vaultId) =>
+        request.get(`/vaults/${vaultId}/sharingInfo`);
+
     api.getTags = () =>
         request.get(`/vaults/tags`);
 
