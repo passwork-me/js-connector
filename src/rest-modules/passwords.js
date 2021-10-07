@@ -54,21 +54,22 @@ module.exports = function (options, request, api, {fileManager}) {
         return attachment;
     }
 
-    api.addPassword = async (vaultId, name, login, password, additionalFields = {}) => {
-        let vault = await api.getVault(vaultId);
-        let data = {name, login, vaultId};
-        data.cryptedPassword = passworkLib.encryptString(password, vault);
-        if (additionalFields.hasOwnProperty('custom') && additionalFields.custom.length > 0) {
-            additionalFields.custom = passworkLib.encryptCustoms(additionalFields.custom, vault);
-        }
-        if (fileManager.canUseFs && additionalFields.hasOwnProperty('attachments') && additionalFields.attachments.length > 0) {
-            additionalFields.attachments = passworkLib.formatAttachments(additionalFields.attachments, vault, fileManager);
-        } else {
-            delete additionalFields.attachments;
-        }
-        data = {...data, ...additionalFields};
+    api.addPassword = async (fields = {}) => {
+        let vault = await api.getVault(fields.vaultId);
 
-        return request.post('/passwords', data);
+        fields.cryptedPassword = passworkLib.encryptString(fields.password, vault)
+        delete fields.password;
+
+        if (fields.hasOwnProperty('custom') && fields.custom.length > 0) {
+            fields.custom = passworkLib.encryptCustoms(fields.custom, vault);
+        }
+        if (fileManager.canUseFs && fields.hasOwnProperty('attachments') && fields.attachments.length > 0) {
+            fields.attachments = passworkLib.formatAttachments(fields.attachments, vault, fileManager);
+        } else {
+            delete fields.attachments;
+        }
+
+        return request.post('/passwords', fields);
     };
 
     api.editPassword = async (passwordId, fields = {}) => {

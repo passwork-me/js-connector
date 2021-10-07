@@ -106,14 +106,14 @@ PassworkAPI.prototype.searchPasswordsByUrl = (url) => throw new Error('not imple
 /**
  * Add password
  * @see POST: /passwords
- * @param {string} vaultId
- * @param {string} passwordName
- * @param {string} passwordLogin
- * @param {string} password
  * @param {{
- *   color: string|null,
+ *   vaultId:  string
+ *   name:     string,
+ *   login:    string,
+ *   password: string,
+ *   color:    string|null,
  *   folderId: string|null,
- *   tags: string[],
+ *   tags:     string[],
  *   custom: [
  *      {
  *          name:  string,
@@ -130,13 +130,7 @@ PassworkAPI.prototype.searchPasswordsByUrl = (url) => throw new Error('not imple
  * }} fields
  * @return {Promise}
  */
-PassworkAPI.prototype.addPassword = (
-    vaultId,
-    passwordName,
-    passwordLogin,
-    password,
-    fields = {}
-) => throw new Error('not implemented');
+PassworkAPI.prototype.addPassword = (fields = {}) => throw new Error('not implemented');
 
 /**
  * Edit password
