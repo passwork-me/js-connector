@@ -41,10 +41,9 @@ module.exports = function (options, request, api) {
                 data = {name, salt};
                 if (isPrivate) {
                     data.passwordCrypted = cryptoInterface.encode(groupPwd, options.masterPassword)
-                } else {
-                    let domainMaster = cryptoInterface.decode(domain.mpCrypted, options.masterPassword)
-                    data.mpCrypted = cryptoInterface.encode(groupPwd, domainMaster);
                 }
+                let domainMaster = cryptoInterface.decode(domain.mpCrypted, options.masterPassword)
+                data.mpCrypted = cryptoInterface.encode(groupPwd, domainMaster);
                 data.passwordHash = cryptoInterface.hash(groupPwd + salt)
             } else {
                 data = {

@@ -4,7 +4,11 @@ module.exports = {
     examples: async (passwork) => {
         // Create vault and password
         let vaultId = await passwork.addVault('API Vault', false);
-        let {id: passwordId} = await passwork.addPassword(vaultId, 'FTP Access', 'dlpuser@dlptest.com', 'eUj8GeW55SvYaswqUyDSm5v6N', {
+        let {id: passwordId} = await passwork.addPassword({
+            vaultId,
+            name: 'FTP Access',
+            login: 'dlpuser@dlptest.com',
+            password: 'eUj8GeW55SvYaswqUyDSm5v6N',
             url: 'ftp.dlptest.com'
         });
 

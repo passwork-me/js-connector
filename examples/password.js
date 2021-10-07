@@ -14,7 +14,11 @@ async function passwordExamples (passwork, env)  {
     let searchResult = await passwork.searchPasswords('pass');
     console.log('Search results: ', searchResult);
 
-    password = await passwork.addPassword(env.EXAMPLE_VAULT, 'Pass Name', 'PassLogin', 'password', {
+    password = await passwork.addPassword({
+        vaultId: env.EXAMPLE_VAULT,
+        name: 'Pass Name',
+        login: 'PassLogin',
+        password: 'password',
         folderId:    null,
         tags:        [],
         snapshot:    null,
