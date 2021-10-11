@@ -225,6 +225,14 @@ PassworkAPI.prototype.favoritePassword = (passwordId) => throw new Error('not im
 PassworkAPI.prototype.unfavoritePassword = (passwordId) => throw new Error('not implemented');
 
 /**
+ * Get password sharing info
+ * @see GET: /passwords/{id}/sharingInfo
+ * @param {string} passwordId — ID
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getPasswordSharingInfo = (passwordId) => throw new Error('not implemented');
+
+/**
  * Get vaults of current user
  * @see GET: /vaults/list
  * @return {Promise}

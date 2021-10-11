@@ -77,6 +77,10 @@ async function passwordExamples (passwork, env)  {
     let unfavorite = await passwork.unfavoritePassword(password.id);
     console.log(unfavorite);
 
+    let sharingInfo = await passwork.getPasswordSharingInfo(password.id);
+    console.log('Password sharing info: ', sharingInfo);
+
+
     let delPwd = await passwork.deletePassword(password.id);
     let delCopy = await passwork.deletePassword(movedId);
     console.log(delPwd, delCopy);

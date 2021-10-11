@@ -123,6 +123,8 @@ module.exports = function (options, request, api, {fileManager}) {
 
     api.unfavoritePassword = async (passwordId) => request.post(`/passwords/${passwordId}/unfavorite`);
 
+    api.getPasswordSharingInfo = async (passwordId) => request.get(`/passwords/${passwordId}/sharingInfo`);
+
     async function moveCopy(copy, passwordId, vaultTo, folderTo) {
         let action = copy ? 'copy' : 'move';
         let password = await api.getPassword(passwordId);
