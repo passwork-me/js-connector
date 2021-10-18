@@ -233,6 +233,17 @@ PassworkAPI.prototype.unfavoritePassword = (passwordId) => throw new Error('not 
 PassworkAPI.prototype.getPasswordSharingInfo = (passwordId) => throw new Error('not implemented');
 
 /**
+ * Generate share hyperlink
+ * @see POST: /passwords/generateShareLink
+ * @param {string} passwordId
+ * @param {boolean} reusable
+ * @param {number} time — Time to live in hours
+ * @param {string|null} secret
+ * @return {Promise}
+ */
+PassworkAPI.prototype.generatePasswordShareLink = (passwordId, reusable = false, time = 24, secret = null) => throw new Error('not implemented');
+
+/**
  * Get vaults of current user
  * @see GET: /vaults/list
  * @return {Promise}
