@@ -158,7 +158,7 @@ module.exports = function (options, request, api, {fileManager}) {
             delete password.cryptedPassword;
         }
 
-        return request.post(`/passwords/generateShareLink`, {password, reusable, time, secret}).then(res => {
+        return request.post(`/passwords/generate-share-link`, {password, reusable, time, secret}).then(res => {
             if (secret) {
                 return res + '#code=' + secret;
             }
