@@ -125,6 +125,47 @@ module.exports = function (options, request, api, {fileManager}) {
 
     api.getPasswordSharingInfo = async (passwordId) => request.get(`/passwords/${passwordId}/sharingInfo`);
 
+    api.generatePasswordShareLink = async (passwordId, reusable = false, time = 24, secret = null) => {
+        const password = await api.getPassword(passwordId);
+
+        if (options.useMasterPassword && !secret) {
+            secret = cryptoInterface.generateString(32);
+        }
+        if (!options.useMasterPassword && secret !== null) {
+            secret = null;
+        }
+
+        if (password.custom && password.custom.length) {
+            password.custom = password.getCustoms();
+        }
+
+        if (secret) {
+            password.cryptedPassword = password.getPassword();
+            // Encode password, customs, attachments with secret code
+            password.cryptedPassword = passworkLib.encryptString(password.cryptedPassword, null, secret);
+            if (password.custom && password.custom.length) {
+                password.custom = passworkLib.encryptCustoms(password.custom, null, secret);
+            }
+            if (password.attachments && password.attachments.length) {
+                const vault = await api.getVault(password.vaultId);
+                password.attachments.map(attachment => {
+                    let key = passworkLib.decryptString(attachment.encryptedKey, vault);
+                    attachment.encryptedKey = passworkLib.encryptString(key, null, secret);
+                });
+            }
+        } else {
+            password.password = password.getPassword();
+            delete password.cryptedPassword;
+        }
+
+        return request.post(`/passwords/generate-share-link`, {password, reusable, time}).then(res => {
+            if (secret) {
+                return res + '#code=' + secret;
+            }
+            return res;
+        });
+    };
+
     async function moveCopy(copy, passwordId, vaultTo, folderTo) {
         let action = copy ? 'copy' : 'move';
         let password = await api.getPassword(passwordId);

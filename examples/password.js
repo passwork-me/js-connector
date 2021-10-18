@@ -80,6 +80,8 @@ async function passwordExamples (passwork, env)  {
     let sharingInfo = await passwork.getPasswordSharingInfo(password.id);
     console.log('Password sharing info: ', sharingInfo);
 
+    let sharedLink = await passwork.generatePasswordShareLink(password.id);
+    console.log('Password shared link: ', sharedLink);
 
     let delPwd = await passwork.deletePassword(password.id);
     let delCopy = await passwork.deletePassword(movedId);
