@@ -426,3 +426,10 @@ PassworkAPI.prototype.copyFolder = (folderId, vaultTo, folderTo = null) => throw
  * @return {Promise}
  */
 PassworkAPI.prototype.activityReport = (dateFrom, dateTo = null) => throw new Error('not implemented');
+
+/**
+ * Get passwork settings
+ * @see GET: /info/settings
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getPassworkSettings = () => throw new Error('not implemented');
