@@ -132,7 +132,7 @@ module.exports = function (options, request, api, {fileManager}) {
             secret = cryptoInterface.generateString(32);
         }
         if (!options.useMasterPassword && secret !== null) {
-            secret = null
+            secret = null;
         }
 
         if (password.custom && password.custom.length) {
@@ -158,7 +158,7 @@ module.exports = function (options, request, api, {fileManager}) {
             delete password.cryptedPassword;
         }
 
-        return request.post(`/passwords/generate-share-link`, {password, reusable, time, secret}).then(res => {
+        return request.post(`/passwords/generate-share-link`, {password, reusable, time}).then(res => {
             if (secret) {
                 return res + '#code=' + secret;
             }
