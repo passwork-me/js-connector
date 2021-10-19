@@ -43,6 +43,22 @@ PassworkAPI.prototype.version = () => throw new Error('not implemented');
 PassworkAPI.prototype.userInfo = () => throw new Error('not implemented');
 
 /**
+ * Get last user notifications
+ * @see POST: /user/notifications
+ * @param {number} page
+ * @param {number} limit
+ * @return {Promise}
+ */
+PassworkAPI.prototype.userNotifications = (page = 1, limit = 10) => throw new Error('not implemented');
+
+/**
+ * Mark all user notifications as viewed
+ * @see POST: /user/notifications/mark-as-viewed
+ * @return {Promise}
+ */
+PassworkAPI.prototype.userNotificationsMarkAsViewed = () => throw new Error('not implemented');
+
+/**
  * Get passwords
  * @see GET: /vaults/{id}/passwords
  * @see GET: /folders/{id}/passwords

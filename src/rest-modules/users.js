@@ -14,7 +14,7 @@ module.exports = function (options, request, api) {
                 reject(err);
             });
         });
-    }
+    };
 
     api.logout = () => {
         return new Promise((resolve, reject) => {
@@ -22,7 +22,11 @@ module.exports = function (options, request, api) {
                 resolve()
             }).catch(err => reject(err));
         });
-    }
+    };
 
-    api.userInfo = () => request.get('/user/info')
+    api.userInfo = () => request.get('/user/info');
+
+    api.userNotifications = (page = 1, limit = 10) => request.post('/user/notifications', {page, limit});
+
+    api.userNotificationsMarkAsViewed = () => request.post('/user/notifications/mark-as-viewed');
 };

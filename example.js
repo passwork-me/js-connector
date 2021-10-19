@@ -10,6 +10,7 @@ const passwork = new Passwork(env.HOST);
         await require('./examples/vault').vaultExamples(passwork, env);
         await require('./examples/folder').folderExamples(passwork, env);
         await require('./examples/password').passwordExamples(passwork, env);
+        await require('./examples/user').userExamples(passwork, env);
         await require('./examples/ftp-connection').examples(passwork);
 
         await passwork.logout();
