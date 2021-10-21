@@ -79,7 +79,7 @@ module.exports = function (options, request, api, {fileManager}) {
         if (fields.hasOwnProperty('password')) {
             data.cryptedPassword = passworkLib.encryptString(fields.password, vault);
         }
-        if (fields.hasOwnProperty('custom') && additionalFields.custom.length > 0) {
+        if (fields.hasOwnProperty('custom') && fields.custom.length > 0) {
             fields.custom = passworkLib.encryptCustoms(fields.custom, vault);
         }
         if (fileManager.canUseFs && fields.hasOwnProperty('attachments')) {
