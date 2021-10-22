@@ -78,6 +78,8 @@ module.exports = function (options, request, api, {fileManager}) {
         let data = {};
         if (fields.hasOwnProperty('password')) {
             data.cryptedPassword = passworkLib.encryptString(fields.password, vault);
+            data.passwordFieldChanged = true;
+            delete fields.password;
         }
         if (fields.hasOwnProperty('custom') && fields.custom.length > 0) {
             fields.custom = passworkLib.encryptCustoms(fields.custom, vault);
