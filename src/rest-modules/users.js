@@ -28,5 +28,7 @@ module.exports = function (options, request, api) {
 
     api.userNotifications = (page = 1, limit = 10) => request.post('/user/notifications', {page, limit});
 
+    api.userNotificationsCountNew = () => request.get('/user/notifications/count-new');
+
     api.userNotificationsMarkAsViewed = () => request.post('/user/notifications/mark-as-viewed');
 };
