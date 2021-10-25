@@ -52,6 +52,13 @@ PassworkAPI.prototype.userInfo = () => throw new Error('not implemented');
 PassworkAPI.prototype.userNotifications = (page = 1, limit = 10) => throw new Error('not implemented');
 
 /**
+ * Get number of not viewed notifications
+ * @see GET: /user/notifications/count-new
+ * @return {Promise}
+ */
+PassworkAPI.prototype.userNotificationsCountNew = () => throw new Error('not implemented');
+
+/**
  * Mark all user notifications as viewed
  * @see POST: /user/notifications/mark-as-viewed
  * @return {Promise}
