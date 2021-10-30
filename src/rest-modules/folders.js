@@ -53,11 +53,11 @@ module.exports = function (options, request, api) {
         for (const {id} of passwords) {
             let password = await api.getPassword(id);
             data.cryptedPasswords[id] = passworkLib.encryptString(password.getPassword(), targetVault)
-            if (password.custom !== null) {
+            if (password.hasOwnProperty('custom') && password.custom !== null) {
                 let decryptCustoms = passworkLib.decryptCustoms(password.custom, sourceVault);
                 data.custom[id] = passworkLib.encryptCustoms(decryptCustoms, targetVault);
             }
-            if (password.attachments !== null && password.attachments.length > 0) {
+            if (password.hasOwnProperty('attachments') && password.attachments !== null && password.attachments.length > 0) {
                 data.attachments[id] = [];
                 for (let {id: attachmentId, name, encryptedKey} of password.attachments) {
                     let key = cryptoInterface.decode(encryptedKey, sourceVaultMaster);
