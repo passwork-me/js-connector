@@ -175,11 +175,11 @@ module.exports = function (options, request, api, {fileManager}) {
         let targetVault = password.vaultId === vaultTo ? sourceVault : await api.getVault(vaultTo);
         let data = {passwordId, vaultTo, folderTo};
         data.cryptedPassword = passworkLib.encryptString(password.getPassword(), targetVault);
-        if (password.custom !== null) {
+        if (password.hasOwnProperty('custom') && password.custom !== null) {
             let decryptCustoms = passworkLib.decryptCustoms(password.custom, sourceVault);
             data.custom = passworkLib.encryptCustoms(decryptCustoms, targetVault);
         }
-        if (password.attachments !== null && password.attachments.length > 0) {
+        if (password.hasOwnProperty('attachments') && password.attachments !== null && password.attachments.length > 0) {
             data.attachments = [];
             for (let {id, name, encryptedKey} of password.attachments) {
                 let key = cryptoInterface.decode(encryptedKey, passworkLib.getVaultMaster(sourceVault));
