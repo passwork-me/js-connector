@@ -22,6 +22,7 @@ module.exports = function (options) {
             .send(body)
             .set('Passwork-Auth', options.token)
             .set('Passwork-MasterHash', cryptoInterface.hash(options.masterPassword))
+            .set('Passwork-Lang', options.lang)
             .then(res => resolve(res.body.data))
             .catch(err => {
                 err.endpoint = requestUrl;

@@ -21,6 +21,7 @@ module.exports = function (host, services = null) {
         masterPassword: false,
         useMasterPassword: false,
         debug: false,
+        lang: null,
     };
 
     this.setAuthOptions = (apiToken, masterPass = false) => {
@@ -32,7 +33,16 @@ module.exports = function (host, services = null) {
             _options.masterPassword = false;
             _options.useMasterPassword = false;
         }
-    }
+    };
+
+    this.setOptions = (options) => {
+        if (!options) {
+            return;
+        }
+        if (options.hasOwnProperty('lang')) {
+            _options.lang = options.lang;
+        }
+    };
 
     const request = new services.agent(_options).request;
     restModules.forEach(m => new m(_options, request, this, services));
