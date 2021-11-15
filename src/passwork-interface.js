@@ -22,6 +22,13 @@ PassworkAPI.prototype.login = (apiKey, masterPassword = null) => throw new Error
 PassworkAPI.prototype.setAuthOptions = (apiToken, masterPassword = false) => {};
 
 /**
+ * Set request options
+ * @param {{
+ *   lang: string
+ * }} options */
+PassworkAPI.prototype.setOptions = (options) => {};
+
+/**
  * Logout
  * @see POST: /auth/logout
  * @return {Promise}
