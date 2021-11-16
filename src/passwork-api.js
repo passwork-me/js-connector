@@ -16,12 +16,13 @@ module.exports = function (host, services = null) {
         services = require('./services');
     }
     const _options = {
-        host: host,
-        token: '',
-        masterPassword: false,
+        host:              host,
+        token:             '',
+        masterPassword:    false,
         useMasterPassword: false,
-        debug: false,
-        lang: null,
+        debug:             false,
+        lang:              null,
+        hash:              'sha256',
     };
 
     this.setAuthOptions = (apiToken, masterPass = false) => {
@@ -41,6 +42,9 @@ module.exports = function (host, services = null) {
         }
         if (options.hasOwnProperty('lang')) {
             _options.lang = options.lang;
+        }
+        if (options.hasOwnProperty('hash') && ['sha256', 'md5'].indexOf(options.hash) >= 0) {
+            _options.hash = options.hash;
         }
     };
 

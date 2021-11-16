@@ -1,6 +1,5 @@
-const cryptoInterface = require("../../libs/crypt");
-
 module.exports = function (options, request, api) {
+    const cryptoInterface = require("../../libs/crypt")(options);
 
     api.getDomain = () =>
         request.get('/vaults/domain');

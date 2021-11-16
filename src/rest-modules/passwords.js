@@ -1,6 +1,5 @@
-const cryptoInterface = require("../../libs/crypt");
-
 module.exports = function (options, request, api, {fileManager}) {
+    const cryptoInterface = require("../../libs/crypt")(options);
     const passworkLib = require("../../libs/passwork")(options);
 
     const enrichPassword = (password, vault) => {
