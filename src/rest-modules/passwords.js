@@ -133,7 +133,7 @@ module.exports = function (options, request, api, {fileManager}) {
         if (options.useMasterPassword && !secret) {
             secret = cryptoInterface.generateString(32);
         }
-        if (!options.useMasterPassword && secret !== null) {
+        if (!options.useMasterPassword) {
             secret = null;
         }
 
@@ -141,6 +141,7 @@ module.exports = function (options, request, api, {fileManager}) {
             password.custom = password.getCustoms();
         }
 
+        let secretHash = null;
         if (secret) {
             password.cryptedPassword = password.getPassword();
             // Encode password, customs, attachments with secret code
@@ -155,12 +156,13 @@ module.exports = function (options, request, api, {fileManager}) {
                     attachment.encryptedKey = passworkLib.encryptString(key, null, secret);
                 });
             }
+            secretHash = cryptoInterface.hash(secret);
         } else {
             password.password = password.getPassword();
             delete password.cryptedPassword;
         }
 
-        return request.post(`/passwords/generate-share-link`, {password, reusable, time}).then(res => {
+        return request.post(`/passwords/generate-share-link`, {password, reusable, time, secretHash}).then(res => {
             if (secret) {
                 return res + '#code=' + secret;
             }
