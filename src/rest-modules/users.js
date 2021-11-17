@@ -5,7 +5,7 @@ module.exports = function (options, request, api) {
         options.useMasterPassword = !!masterPassword;
         return new Promise((resolve, reject) => {
             api.version().then(info => {
-                if (info && info.hasOwnProperty('legacySupport') && info.legacySupport) {
+                if (info.legacySupport) {
                     api.setOptions({hash: 'md5'});
                 }
                 return request.post(`/auth/login/${apiKey}`, {useMasterPassword: options.useMasterPassword});
