@@ -3,9 +3,17 @@ module.exports = function (options, request, api) {
     api.login = (apiKey, masterPassword = null) => {
         options.masterPassword = masterPassword ? masterPassword : false;
         options.useMasterPassword = !!masterPassword;
+        let versionInfo;
         return new Promise((resolve, reject) => {
-            request.post(`/auth/login/${apiKey}`, {useMasterPassword: options.useMasterPassword}).then(data => {
+            api.version().then(info => {
+                if (info.legacySupport) {
+                    api.setOptions({hash: 'md5'});
+                }
+                versionInfo = info;
+                return request.post(`/auth/login/${apiKey}`, {useMasterPassword: options.useMasterPassword});
+            }).then(data => {
                 options.token = data.token;
+                data.versionInfo = versionInfo;
                 resolve(data);
             }).catch(err => {
                 if (err.code === 'clientSideEncryptionDisabled') {

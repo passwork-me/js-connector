@@ -1,6 +1,6 @@
-const cryptoInterface = require("./crypt");
-
 module.exports = options => {
+    const cryptoInterface = require("./crypt")(options);
+
     let self = {
         getVaultMaster:            (vault) => {
             if (!options.useMasterPassword) {

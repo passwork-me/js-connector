@@ -1,8 +1,6 @@
-const superagent = require("superagent");
-const cryptoInterface = require("../libs/crypt");
-
-
 module.exports = function (options) {
+    const superagent = require("superagent");
+    const cryptoInterfaceFactory = require("../libs/crypt");
     const _method = {
         'POST':   (ep) => superagent.post(ep),
         'PUT':    (ep) => superagent.put(ep),
@@ -21,7 +19,7 @@ module.exports = function (options) {
         _method[method](options.host + endpoint)
             .send(body)
             .set('Passwork-Auth', options.token)
-            .set('Passwork-MasterHash', cryptoInterface.hash(options.masterPassword))
+            .set('Passwork-MasterHash', cryptoInterfaceFactory(options).hash(options.masterPassword))
             .set('Passwork-Lang', options.lang)
             .then(res => resolve(res.body.data))
             .catch(err => {

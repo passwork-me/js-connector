@@ -24,7 +24,8 @@ PassworkAPI.prototype.setAuthOptions = (apiToken, masterPassword = false) => {};
 /**
  * Set request options
  * @param {{
- *   lang: string
+ *   lang: string,
+ *   hash: string,
  * }} options */
 PassworkAPI.prototype.setOptions = (options) => {};
 
