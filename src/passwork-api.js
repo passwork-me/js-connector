@@ -1,3 +1,4 @@
+const passworkLibFactory = require("../libs/passwork");
 const restModules = [
     require("./rest-modules/passwords"),
     require("./rest-modules/users"),
@@ -18,34 +19,61 @@ module.exports = function (host, services = null) {
     const _options = {
         host:              host,
         token:             '',
+        tokenExpiredAt:    null,
         masterPassword:    false,
         useMasterPassword: false,
         debug:             false,
         lang:              null,
         hash:              'sha256',
+        sessionCode:       null,
+    };
+
+    this.setOptions = (data) => {
+        if (!data) {
+            return;
+        }
+        const availableOptions = [
+            'masterPassword',
+            'useMasterPassword',
+            'lang',
+            'token',
+            'tokenExpiredAt',
+            'sessionCode',
+        ];
+        for (const key in data) {
+            if (data.hasOwnProperty(key) && availableOptions.indexOf(key) >= 0) {
+                _options[key] = data[key];
+            }
+        }
+        if (data.hasOwnProperty('hash') && ['sha256', 'md5'].indexOf(data.hash) >= 0) {
+            _options.hash = data.hash;
+        }
     };
 
     this.setAuthOptions = (apiToken, masterPass = false) => {
-        _options.token = apiToken;
         if (!!masterPass) {
-            _options.masterPassword = masterPass;
-            _options.useMasterPassword = true;
+            this.setOptions({token: apiToken, masterPassword: masterPass, useMasterPassword: true});
         } else {
-            _options.masterPassword = false;
-            _options.useMasterPassword = false;
+            this.setOptions({token: apiToken, masterPassword: false, useMasterPassword: false});
         }
     };
 
-    this.setOptions = (options) => {
-        if (!options) {
-            return;
+    this.getSessionCode = () => {
+        return _options.sessionCode;
+    };
+
+    this.restoreSession = (sessionCode) => {
+        let session;
+        try {
+            session = passworkLibFactory(_options).decryptSessionCode(sessionCode);
+        } catch (e) {
+            throw 'invalidSessionCode';
         }
-        if (options.hasOwnProperty('lang')) {
-            _options.lang = options.lang;
+        if (!session.tokenExpiredAt || session.tokenExpiredAt <= Math.floor(Date.now() / 1000)) {
+            throw 'sessionExpired';
         }
-        if (options.hasOwnProperty('hash') && ['sha256', 'md5'].indexOf(options.hash) >= 0) {
-            _options.hash = options.hash;
-        }
+
+        this.setOptions(session);
     };
 
     const request = new services.agent(_options).request;

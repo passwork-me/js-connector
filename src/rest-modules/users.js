@@ -1,8 +1,11 @@
 module.exports = function (options, request, api) {
+    const passworkLib = require("../../libs/passwork")(options);
 
     api.login = (apiKey, masterPassword = null) => {
-        options.masterPassword = masterPassword ? masterPassword : false;
-        options.useMasterPassword = !!masterPassword;
+        api.setOptions({
+            masterPassword:    masterPassword ? masterPassword : false,
+            useMasterPassword: !!masterPassword,
+        });
         let versionInfo;
         return new Promise((resolve, reject) => {
             api.version().then(info => {
@@ -12,8 +15,11 @@ module.exports = function (options, request, api) {
                 versionInfo = info;
                 return request.post(`/auth/login/${apiKey}`, {useMasterPassword: options.useMasterPassword});
             }).then(data => {
-                options.token = data.token;
+                const sessionCode = passworkLib.encryptSessionCode(options, versionInfo);
+                api.setOptions({token: data.token, tokenExpiredAt: data.tokenExpiredAt, sessionCode});
+
                 data.versionInfo = versionInfo;
+                data.sessionCode = sessionCode;
                 resolve(data);
             }).catch(err => {
                 if (err.code === 'clientSideEncryptionDisabled') {

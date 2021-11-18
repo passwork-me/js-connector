@@ -15,6 +15,19 @@ function PassworkAPI() {
 PassworkAPI.prototype.login = (apiKey, masterPassword = null) => throw new Error('not implemented');
 
 /**
+ * Get encrypted session code after successful login
+ * @return {string}
+ */
+PassworkAPI.prototype.getSessionCode = () => throw new Error('not implemented');
+
+/**
+ * Restore session by encrypted session code
+ * @param {string} sessionCode
+ * @throws invalidSessionCode or sessionExpired
+ */
+PassworkAPI.prototype.restoreSession = (sessionCode) => throw new Error('not implemented');
+
+/**
  * Set apiToken and masterPassword directly without Login method call
  * @param {string} apiToken
  * @param {string|boolean} masterPassword

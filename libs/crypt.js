@@ -8,11 +8,6 @@ const btoa = require('btoa');
 
 
 module.exports = options => {
-    let hashFunc = 'sha256';
-    if (options && options.hasOwnProperty('hash')) {
-        hashFunc = options.hash;
-    }
-
     return {
         'JSEncrypt' : JSEncrypt,
         'rsa' : new JSEncrypt(),
@@ -272,7 +267,7 @@ module.exports = options => {
                 return '';
             }
 
-            if (hashFunc === 'md5') {
+            if (options.hash === 'md5') {
                 return this.md5Hash(str);
             } else {
                 return sha256(str);

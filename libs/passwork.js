@@ -2,6 +2,12 @@ module.exports = options => {
     const cryptoInterface = require("./crypt")(options);
 
     let self = {
+        encryptSessionCode: ({token, tokenExpiredAt, masterPassword}, {legacySupport}) => {
+            return cryptoInterface.base64encode(JSON.stringify({token, tokenExpiredAt, masterPassword, legacySupport}));
+        },
+        decryptSessionCode: (sessionCode) => {
+            return JSON.parse(cryptoInterface.base64decode(sessionCode));
+        },
         getVaultMaster:            (vault) => {
             if (!options.useMasterPassword) {
                 return '';
