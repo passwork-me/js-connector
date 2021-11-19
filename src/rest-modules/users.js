@@ -15,8 +15,13 @@ module.exports = function (options, request, api) {
                 versionInfo = info;
                 return request.post(`/auth/login/${apiKey}`, {useMasterPassword: options.useMasterPassword});
             }).then(data => {
-                const sessionCode = passworkLib.encryptSessionCode(options, versionInfo);
-                api.setOptions({token: data.token, tokenExpiredAt: data.tokenExpiredAt, sessionCode});
+                const {token, tokenTtl, tokenExpiredAt} = data;
+                const sessionCode = passworkLib.encryptSessionCode({
+                    token, tokenTtl, tokenExpiredAt,
+                    masterPassword: options.masterPassword,
+                    legacySupport:  versionInfo.legacySupport
+                });
+                api.setOptions({token, tokenTtl, tokenExpiredAt, sessionCode});
 
                 data.versionInfo = versionInfo;
                 data.sessionCode = sessionCode;

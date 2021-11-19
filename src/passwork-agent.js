@@ -1,4 +1,4 @@
-module.exports = function (options) {
+module.exports = function (options, api) {
     const superagent = require("superagent");
     const cryptoInterfaceFactory = require("../libs/crypt");
     const _method = {
@@ -15,6 +15,9 @@ module.exports = function (options) {
             console.log(requestUrl);
         }
 
+        if (endpoint.indexOf('/info/version') === -1 && endpoint.indexOf('/auth/login/') === -1) {
+            api.updateSessionTtl();
+        }
 
         _method[method](options.host + endpoint)
             .send(body)
@@ -25,7 +28,7 @@ module.exports = function (options) {
             .catch(err => {
                 err.endpoint = requestUrl;
                 return reject(err);
-            })
+            });
     });
 
     for (const key in _method) {

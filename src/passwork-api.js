@@ -19,6 +19,7 @@ module.exports = function (host, services = null) {
     const _options = {
         host:              host,
         token:             '',
+        tokenTtl:          null,
         tokenExpiredAt:    null,
         masterPassword:    false,
         useMasterPassword: false,
@@ -37,6 +38,7 @@ module.exports = function (host, services = null) {
             'useMasterPassword',
             'lang',
             'token',
+            'tokenTtl',
             'tokenExpiredAt',
             'sessionCode',
         ];
@@ -76,7 +78,16 @@ module.exports = function (host, services = null) {
         this.setOptions(session);
     };
 
-    const request = new services.agent(_options).request;
+    this.updateSessionTtl = () => {
+        try {
+            const session = passworkLibFactory(_options).decryptSessionCode(_options.sessionCode);
+            session.tokenExpiredAt = Math.floor(Date.now() / 1000) + session.tokenTtl;
+            _options.sessionCode = passworkLibFactory(_options).encryptSessionCode(session)
+        } catch (e) {
+        }
+    };
+
+    const request = new services.agent(_options, this).request;
     restModules.forEach(m => new m(_options, request, this, services));
 
 };
