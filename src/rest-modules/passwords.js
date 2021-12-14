@@ -23,9 +23,9 @@ module.exports = function (options, request, api, {fileManager}) {
         }
     }
 
-    api.getPasswords = async (vaultId = null, folderId = null) => {
+    api.getPasswords = (vaultId = null, folderId = null) => {
         const ep = !!folderId ? `/folders/${folderId}/passwords` : `/vaults/${vaultId}/passwords`;
-        return await request.get(ep);
+        return request.get(ep).then(res => res.sort((a, b) => a.name.localeCompare(b.name)));
     }
 
     api.getPassword = async (passwordId) => {

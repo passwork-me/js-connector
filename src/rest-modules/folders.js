@@ -6,10 +6,10 @@ module.exports = function (options, request, api) {
         request.get(`/folders/${folderId}`);
 
     api.getFolders = (vaultId) =>
-        request.get(`/vaults/${vaultId}/folders`);
+        request.get(`/vaults/${vaultId}/folders`).then(res => res.sort((a, b) => a.name.localeCompare(b.name)));
 
     api.getSubFolders = (folderId) =>
-        request.get(`/folders/${folderId}/children`);
+        request.get(`/folders/${folderId}/children`).then(res => res.sort((a, b) => a.name.localeCompare(b.name)));
 
     api.addFolder = (vaultId, folderName, parentFolderId = null) => {
         return request.post('/folders', {
@@ -19,12 +19,12 @@ module.exports = function (options, request, api) {
         });
     };
 
-    api.editFolder = (folderId, folderName, parentFolderId) => new Promise((resolve, reject) => {
-        request.put(`/folders/${folderId}`, {
+    api.editFolder = (folderId, folderName, parentFolderId) => {
+        return request.put(`/folders/${folderId}`, {
             name:     folderName,
             parentId: parentFolderId,
-        }).then(res => resolve(res));
-    });
+        });
+    };
 
     api.deleteFolder = (folderId) =>
         request.delete(`/folders/${folderId}`);
