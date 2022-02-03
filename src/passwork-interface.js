@@ -275,6 +275,21 @@ PassworkAPI.prototype.getPasswordSharingInfo = (passwordId) => throw new Error('
 PassworkAPI.prototype.generatePasswordShareLink = (passwordId, reusable = false, time = 24, secret = null) => throw new Error('not implemented');
 
 /**
+ * Get inbox passwords list
+ * @see GET: /sharing/inbox/list
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getInboxPasswords = () => throw new Error('not implemented');
+
+/**
+ * Get inbox password
+ * @see GET: /sharing/inbox/{inboxId}
+ * @param {string} inboxId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getInboxPassword = (inboxId) => throw new Error('not implemented');
+
+/**
  * Get vaults of current user
  * @see GET: /vaults/list
  * @return {Promise}

@@ -25,7 +25,6 @@
     "build": "parcel build web/src/passwork-web-api.js -d web/dist"
   },
   "devDependencies": {
-    "basic-ftp": "^4.6.3",
     "parcel-bundler": "^1.3.1"
   }
 }
