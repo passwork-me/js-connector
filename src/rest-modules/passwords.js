@@ -183,8 +183,10 @@ module.exports = function (options, request, api, {fileManager}) {
         if (password.hasOwnProperty('attachments') && password.attachments !== null && password.attachments.length > 0) {
             data.attachments = [];
             for (let {id, name, encryptedKey} of password.attachments) {
-                let key = cryptoInterface.decode(encryptedKey, passworkLib.getVaultMaster(sourceVault));
-                encryptedKey = cryptoInterface.encode(key, passworkLib.getVaultMaster(targetVault))
+                if (options.useMasterPassword) {
+                    let key = cryptoInterface.decode(encryptedKey, passworkLib.getVaultMaster(sourceVault));
+                    encryptedKey = cryptoInterface.encode(key, passworkLib.getVaultMaster(targetVault))
+                }
                 data.attachments.push({id, name, encryptedKey});
             }
         }
@@ -200,7 +202,7 @@ module.exports = function (options, request, api, {fileManager}) {
         sData.password = password.getPassword();
         sData.custom = password.getCustoms();
         sData.groupId = sData.vaultId;
-        if (sData.attachments) {
+        if (sData.attachments && options.useMasterPassword) {
             sData.attachments = sData.attachments.map(function (att) {
                 return {id: att.id, name: att.name, key: cryptoInterface.decode(att.encryptedKey, vaultPass)};
             });
@@ -210,7 +212,11 @@ module.exports = function (options, request, api, {fileManager}) {
         delete sData.vaultId;
 
         sData = JSON.stringify(sData);
-        sData = cryptoInterface.encode(sData, vaultPass);
+        if (options.useMasterPassword) {
+            sData = cryptoInterface.encode(sData, vaultPass);
+        } else {
+            sData = cryptoInterface.base64encode(sData);
+        }
         return sData;
     }
 };

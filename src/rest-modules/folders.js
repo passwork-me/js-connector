@@ -59,8 +59,10 @@ module.exports = function (options, request, api) {
             if (password.hasOwnProperty('attachments') && password.attachments !== null && password.attachments.length > 0) {
                 data.attachments[id] = [];
                 for (let {id: attachmentId, name, encryptedKey} of password.attachments) {
-                    let key = cryptoInterface.decode(encryptedKey, sourceVaultMaster);
-                    encryptedKey = cryptoInterface.encode(key, targetVaultMaster)
+                    if (options.useMasterPassword) {
+                        let key = cryptoInterface.decode(encryptedKey, sourceVaultMaster);
+                        encryptedKey = cryptoInterface.encode(key, targetVaultMaster);
+                    }
                     data.attachments[id].push({id: attachmentId, name, encryptedKey});
                 }
             }
