@@ -121,18 +121,20 @@ PassworkAPI.prototype.getAttachment = (passwordId, attachmentId) => throw new Er
  * @param {string[]} tags
  * @param {string[]} colors
  * @param {string|null} vaultId
+ * @param {boolean} includeShared
  * @return {Promise}
  */
-PassworkAPI.prototype.searchPasswords = (query, tags = [], colors = [], vaultId = null) =>
+PassworkAPI.prototype.searchPasswords = (query, tags = [], colors = [], vaultId = null, includeShared = false) =>
     throw new Error('not implemented');
 
 /**
  * Search passwords by URL
  * @see POST: /passwords/searchByUrl
  * @param {string} url
+ * @param {boolean} includeShared
  * @return {Promise}
  */
-PassworkAPI.prototype.searchPasswordsByUrl = (url) => throw new Error('not implemented');
+PassworkAPI.prototype.searchPasswordsByUrl = (url, includeShared = false) => throw new Error('not implemented');
 
 /**
  * Add password

@@ -40,10 +40,10 @@ module.exports = function (options, request, api, {fileManager}) {
 
     api.getFavoritePasswords = () => request.get("/passwords/favorite");
 
-    api.searchPasswords = (query, tags = [], colors = [], vaultId = null) =>
-        request.post('/passwords/search', {query, tags, colors, vaultId});
+    api.searchPasswords = (query, tags = [], colors = [], vaultId = null, includeShared = false) =>
+        request.post('/passwords/search', {query, tags, colors, vaultId, includeShared});
 
-    api.searchPasswordsByUrl = (url) => request.post('/passwords/searchByUrl', {url});
+    api.searchPasswordsByUrl = (url, includeShared) => request.post('/passwords/searchByUrl', {url, includeShared});
 
     api.getAttachment = async (passwordId, attachmentId) => {
         let password = await api.getPassword(passwordId);
@@ -194,7 +194,7 @@ module.exports = function (options, request, api, {fileManager}) {
         let inboxPassword = await fetchPassword();
         if (!inboxPassword.viewed) {
             const user = await api.userInfo();
-            inboxPassword = fetchPassword(true, inbox.groupPasswordCrypted, user.keys.privateCrypted);
+            inboxPassword = await fetchPassword(true, inboxPassword.groupPasswordCrypted, user.keys.privateCrypted);
         }
 
         const vault = await api.getVault(inboxPassword.vaultId);
