@@ -242,9 +242,14 @@ module.exports = function (options, request, api, {fileManager}) {
                 return {id: att.id, name: att.name, key: cryptoInterface.decode(att.encryptedKey, vaultPass)};
             });
         }
-        delete sData.cryptedPassword;
-        delete sData.updatedAt;
-        delete sData.vaultId;
+
+        const possibleFields = ['id', 'groupId', 'folderId', 'name', 'login', 'url', 'description', 'attachments',
+            'color', 'tags', 'password', 'custom', 'lastPasswordUpdate'];
+        for (const key in sData) {
+            if (possibleFields.indexOf(key) < 0) {
+                delete sData[key];
+            }
+        }
 
         sData = JSON.stringify(sData);
         if (options.useMasterPassword) {
