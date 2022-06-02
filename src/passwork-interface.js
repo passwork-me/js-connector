@@ -268,7 +268,7 @@ PassworkAPI.prototype.getPasswordSharingInfo = (passwordId) => throw new Error('
  * @see POST: /passwords/generate-share-link
  * @param {string} passwordId
  * @param {boolean} reusable
- * @param {number} time — Time to live in hours
+ * @param {number|string} time — Time to live in hours | Available string values for Passwork version 5.*.* : 'hour', 'day', 'week', 'forever'
  * @param {string|null} secret
  * @return {Promise}
  */
