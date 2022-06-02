@@ -129,41 +129,57 @@ module.exports = function (options, request, api, {fileManager}) {
     api.generatePasswordShareLink = async (passwordId, reusable = false, time = 24, secret = null) => {
         const password = await api.getPassword(passwordId);
 
-        if (options.useMasterPassword && !secret) {
-            secret = cryptoInterface.generateString(32);
+        const v5 =  Object.prototype.toString.call(time) === "[object String]";
+
+        let oneTimePassword = null;
+        if (options.useMasterPassword && (v5 || !secret)) {
+            oneTimePassword = cryptoInterface.generateString(32);
         }
-        if (!options.useMasterPassword) {
-            secret = null;
+
+        if (!v5) {
+            if (!options.useMasterPassword) {
+                oneTimePassword = null;
+            } else {
+                oneTimePassword = oneTimePassword? oneTimePassword : secret;
+            }
         }
 
         if (password.custom && password.custom.length) {
             password.custom = password.getCustoms();
         }
 
-        let secretHash = null;
-        if (secret) {
+        let oneTimePasswordHash = null;
+        let oneTimePasswordCrypted = null;
+        if (oneTimePassword) {
             password.cryptedPassword = password.getPassword();
-            // Encode password, customs, attachments with secret code
-            password.cryptedPassword = passworkLib.encryptString(password.cryptedPassword, null, secret);
+            // Encode password, customs, attachments with one time password
+            password.cryptedPassword = passworkLib.encryptString(password.cryptedPassword, null, oneTimePassword);
             if (password.custom && password.custom.length) {
-                password.custom = passworkLib.encryptCustoms(password.custom, null, secret);
+                password.custom = passworkLib.encryptCustoms(password.custom, null, oneTimePassword);
             }
             if (password.attachments && password.attachments.length) {
                 const vault = await api.getVault(password.vaultId);
                 password.attachments.map(attachment => {
                     let key = passworkLib.decryptString(attachment.encryptedKey, vault);
-                    attachment.encryptedKey = passworkLib.encryptString(key, null, secret);
+                    attachment.encryptedKey = passworkLib.encryptString(key, null, oneTimePassword);
                 });
             }
-            secretHash = cryptoInterface.hash(secret);
-        } else {
-            password.password = password.getPassword();
-            delete password.cryptedPassword;
+            oneTimePasswordHash = cryptoInterface.hash(oneTimePassword);
         }
-
-        return request.post(`/passwords/generate-share-link`, {password, reusable, time, secretHash}).then(res => {
-            if (secret) {
-                return res + '#code=' + secret;
+        let data = null;
+        if (v5) {
+            let type = reusable ? 'reusable' : 'onetime';
+            const vault = await api.getVault(password.vaultId);
+            if (oneTimePassword) {
+                oneTimePasswordCrypted = passworkLib.encryptString(oneTimePassword, vault);
+            }
+            data = {password, ttl: time, type, passwordHash: oneTimePasswordHash, oneTimePasswordCrypted};
+        } else {
+            data = {password, reusable, time: time, secretHash: oneTimePasswordHash};
+        }
+        return request.post(`/passwords/generate-share-link`, data).then(res => {
+            if (oneTimePassword) {
+                return res + '#code=' + oneTimePassword;
             }
             return res;
         });
