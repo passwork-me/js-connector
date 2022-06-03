@@ -1,6 +1,6 @@
 {
   "name": "passwork-js",
-  "version": "1.1.17",
+  "version": "1.2.0",
   "dependencies": {
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
