@@ -40,10 +40,10 @@ module.exports = function (options, request, api, {fileManager}) {
 
     api.getFavoritePasswords = () => request.get("/passwords/favorite");
 
-    api.searchPasswords = (query, tags = [], colors = [], vaultId = null) =>
-        request.post('/passwords/search', {query, tags, colors, vaultId});
+    api.searchPasswords = (query, tags = [], colors = [], vaultId = null, includeShared = false) =>
+        request.post('/passwords/search', {query, tags, colors, vaultId, includeShared});
 
-    api.searchPasswordsByUrl = (url) => request.post('/passwords/searchByUrl', {url});
+    api.searchPasswordsByUrl = (url, includeShared) => request.post('/passwords/searchByUrl', {url, includeShared});
 
     api.getAttachment = async (passwordId, attachmentId) => {
         let password = await api.getPassword(passwordId);
@@ -185,6 +185,41 @@ module.exports = function (options, request, api, {fileManager}) {
         });
     };
 
+    api.getInboxPasswords = () => request.get("/sharing/inbox/list");
+
+    api.getInboxPassword = async (inboxId) => {
+        const fetchPassword = async (firstTimeOpen, groupPasswordCrypted, privateCryptedKey) => {
+            const requestData = {passwordCrypted: ''};
+            // Send encrypted group password if inbox opened for the first time
+            if (firstTimeOpen) {
+                let groupPassword = '';
+                if (!options.useMasterPassword) {
+                    groupPassword = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+                } else if (groupPasswordCrypted && privateCryptedKey) {
+                    const decryptedKey = cryptoInterface.decode(privateCryptedKey, options.masterPassword);
+                    groupPassword = cryptoInterface.rsaDecrypt(groupPasswordCrypted, decryptedKey);
+                }
+                if (groupPassword) {
+                    requestData.passwordCrypted = cryptoInterface.encode(groupPassword, options.masterPassword);
+                    requestData.silent = false;
+                }
+            }
+            return request.post(`/sharing/inbox/${inboxId}`, requestData);
+        };
+
+        let inboxPassword = await fetchPassword();
+        if (!inboxPassword.viewed) {
+            const user = await api.userInfo();
+            inboxPassword = await fetchPassword(true, inboxPassword.groupPasswordCrypted, user.keys.privateCrypted);
+        }
+
+        const vault = await api.getVault(inboxPassword.vaultId);
+        enrichPassword(inboxPassword.password, vault);
+        enrichCustoms(inboxPassword.password, vault);
+
+        return inboxPassword;
+    };
+
     async function moveCopy(copy, passwordId, vaultTo, folderTo) {
         let action = copy ? 'copy' : 'move';
         let password = await api.getPassword(passwordId);
@@ -223,9 +258,14 @@ module.exports = function (options, request, api, {fileManager}) {
                 return {id: att.id, name: att.name, key: cryptoInterface.decode(att.encryptedKey, vaultPass)};
             });
         }
-        delete sData.cryptedPassword;
-        delete sData.updatedAt;
-        delete sData.vaultId;
+
+        const possibleFields = ['id', 'groupId', 'folderId', 'name', 'login', 'url', 'description', 'attachments',
+            'color', 'tags', 'password', 'custom', 'lastPasswordUpdate'];
+        for (const key in sData) {
+            if (possibleFields.indexOf(key) < 0) {
+                delete sData[key];
+            }
+        }
 
         sData = JSON.stringify(sData);
         if (options.useMasterPassword) {

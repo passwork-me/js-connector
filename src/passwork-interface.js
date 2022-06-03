@@ -121,18 +121,20 @@ PassworkAPI.prototype.getAttachment = (passwordId, attachmentId) => throw new Er
  * @param {string[]} tags
  * @param {string[]} colors
  * @param {string|null} vaultId
+ * @param {boolean} includeShared
  * @return {Promise}
  */
-PassworkAPI.prototype.searchPasswords = (query, tags = [], colors = [], vaultId = null) =>
+PassworkAPI.prototype.searchPasswords = (query, tags = [], colors = [], vaultId = null, includeShared = false) =>
     throw new Error('not implemented');
 
 /**
  * Search passwords by URL
  * @see POST: /passwords/searchByUrl
  * @param {string} url
+ * @param {boolean} includeShared
  * @return {Promise}
  */
-PassworkAPI.prototype.searchPasswordsByUrl = (url) => throw new Error('not implemented');
+PassworkAPI.prototype.searchPasswordsByUrl = (url, includeShared = false) => throw new Error('not implemented');
 
 /**
  * Add password
@@ -273,6 +275,21 @@ PassworkAPI.prototype.getPasswordSharingInfo = (passwordId) => throw new Error('
  * @return {Promise}
  */
 PassworkAPI.prototype.generatePasswordShareLink = (passwordId, reusable = false, time = 24, secret = null) => throw new Error('not implemented');
+
+/**
+ * Get inbox passwords list
+ * @see GET: /sharing/inbox/list
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getInboxPasswords = () => throw new Error('not implemented');
+
+/**
+ * Get inbox password
+ * @see GET: /sharing/inbox/{inboxId}
+ * @param {string} inboxId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getInboxPassword = (inboxId) => throw new Error('not implemented');
 
 /**
  * Get vaults of current user

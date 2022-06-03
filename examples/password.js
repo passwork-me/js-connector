@@ -86,6 +86,15 @@ async function passwordExamples (passwork, env)  {
     let delPwd = await passwork.deletePassword(password.id);
     let delCopy = await passwork.deletePassword(movedId);
     console.log(delPwd, delCopy);
+
+
+    let inboxPasswordsList = await passwork.getInboxPasswords();
+    console.log('Inbox passwords list: ', inboxPasswordsList);
+
+    if (inboxPasswordsList.length) {
+        let inboxPassword = await passwork.getInboxPassword(inboxPasswordsList[0].id);
+        console.log('Inbox password: ', inboxPassword);
+    }
 }
 
 if (typeof module !== 'undefined') {

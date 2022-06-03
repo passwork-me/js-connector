@@ -32,12 +32,20 @@ module.exports = function (options) {
         this.request[key.toLowerCase()] = (endpoint, body) =>
             this.request(endpoint, key, body)
                 .catch(e => {
-                    throw {
-                        httpRequest: e.endpoint,
-                        httpStatus:  e.status,
-                        httpMessage: e.message,
-                        ...e.response.body
-                    };
+                    if (e.response && e.response.body) {
+                        throw {
+                            httpRequest: e.endpoint,
+                            httpStatus:  e.status,
+                            httpMessage: e.message,
+                            ...e.response.body
+                        };
+                    } else {
+                        throw {
+                            httpRequest: e.endpoint,
+                            httpStatus:  'serverError',
+                            httpMessage: 'serverError',
+                        }
+                    }
                 });
     }
 };
