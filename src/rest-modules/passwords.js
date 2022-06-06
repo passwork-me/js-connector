@@ -222,6 +222,10 @@ module.exports = function (options, request, api, {fileManager}) {
         return inboxPassword;
     };
 
+    api.inboxNotificationsCount = () => request.get('/sharing/inbox/notifications/count');
+
+    api.inboxNotificationsMarkAsViewed = () => request.post('/sharing/inbox/notifications/mark-as-viewed');
+
     async function moveCopy(copy, passwordId, vaultTo, folderTo) {
         let action = copy ? 'copy' : 'move';
         let password = await api.getPassword(passwordId);
