@@ -87,6 +87,8 @@ async function passwordExamples (passwork, env)  {
     let delCopy = await passwork.deletePassword(movedId);
     console.log(delPwd, delCopy);
 
+    let inboxPasswordsCount = await passwork.getInboxPasswordsCount();
+    console.log('Number of inbox passwords', inboxPasswordsCount);
 
     let inboxPasswordsList = await passwork.getInboxPasswords();
     console.log('Inbox passwords list: ', inboxPasswordsList);

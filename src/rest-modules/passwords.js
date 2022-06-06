@@ -187,6 +187,8 @@ module.exports = function (options, request, api, {fileManager}) {
 
     api.getInboxPasswords = () => request.get("/sharing/inbox/list");
 
+    api.getInboxPasswordsCount = () => request.get("/sharing/inbox/count");
+
     api.getInboxPassword = async (inboxId) => {
         const fetchPassword = async (firstTimeOpen, groupPasswordCrypted, privateCryptedKey) => {
             const requestData = {passwordCrypted: ''};

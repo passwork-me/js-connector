@@ -7,6 +7,8 @@ module.exports = function (options, request, api) {
     api.getVaults = () =>
         request.get('/vaults/list').then(res => res.sort((a, b) => a.name.localeCompare(b.name)));
 
+    api.getVaultsCount = () => request.get('/vaults/count');
+
     api.getVault = (vaultId) =>
         request.get(`/vaults/${vaultId}`);
 

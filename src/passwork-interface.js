@@ -292,6 +292,20 @@ PassworkAPI.prototype.getInboxPasswords = () => throw new Error('not implemented
 PassworkAPI.prototype.getInboxPassword = (inboxId) => throw new Error('not implemented');
 
 /**
+ * Get inbox count
+ * @see GET: /sharing/inbox/count
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getInboxPasswordsCount = () => throw new Error('not implemented');
+
+/**
+ * Get vaults count
+ * @see GET: /vaults/count
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getVaultsCount = () => throw new Error('not implemented');
+
+/**
  * Get vaults of current user
  * @see GET: /vaults/list
  * @return {Promise}

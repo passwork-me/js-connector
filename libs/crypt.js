@@ -275,7 +275,7 @@ module.exports = options => {
             if (hashFunc === 'md5') {
                 return this.md5Hash(str);
             } else {
-                return sha256(str);
+                return sha256.hex(str);
             }
         },
         generateString: function (length) {

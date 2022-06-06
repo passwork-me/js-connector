@@ -1,4 +1,7 @@
 async function vaultExamples(passwork, {EXAMPLE_VAULT: exampleVault}) {
+    let vaultsCount = await passwork.getVaultsCount();
+    console.log('Number of vaults: ', vaultsCount);
+
     let vaults = await passwork.getVaults();
     console.log('Vaults: ', vaults);
 
