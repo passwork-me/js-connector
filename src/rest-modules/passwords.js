@@ -165,7 +165,11 @@ module.exports = function (options, request, api, {fileManager}) {
                 });
             }
             oneTimePasswordHash = cryptoInterface.hash(oneTimePassword);
+        } else {
+            password.password = password.getPassword();
+            delete password.cryptedPassword;
         }
+
         let data = null;
         if (v5) {
             let type = reusable ? 'reusable' : 'onetime';
