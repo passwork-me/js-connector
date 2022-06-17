@@ -9,7 +9,9 @@
     "dotenv": "^8.2.0",
     "js-sha256": "^0.9.0",
     "node-jsencrypt": "^1.0.0",
-    "superagent": "^5.2.2"
+    "otplib": "^12.0.1",
+    "superagent": "^5.2.2",
+    "totp-generator": "^0.0.13"
   },
   "repository": {
     "type": "git",
