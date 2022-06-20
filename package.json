@@ -1,6 +1,6 @@
 {
   "name": "passwork-js",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "dependencies": {
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
@@ -9,7 +9,8 @@
     "dotenv": "^8.2.0",
     "js-sha256": "^0.9.0",
     "node-jsencrypt": "^1.0.0",
-    "superagent": "^5.2.2"
+    "superagent": "^5.2.2",
+    "totp-generator": "^0.0.13"
   },
   "repository": {
     "type": "git",

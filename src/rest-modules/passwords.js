@@ -1,6 +1,7 @@
 module.exports = function (options, request, api, {fileManager}) {
     const cryptoInterface = require("../../libs/crypt")(options);
     const passworkLib = require("../../libs/passwork")(options);
+    const totp = require("totp-generator");
 
     const enrichPassword = (password, vault) => {
         password.getPassword = () => passworkLib.decryptString(password.cryptedPassword, vault);
@@ -19,7 +20,17 @@ module.exports = function (options, request, api, {fileManager}) {
             if (!password.custom) {
                 return null;
             }
-            return passworkLib.decryptCustoms(password.custom, vault);
+
+            let customs = passworkLib.decryptCustoms(password.custom, vault);
+            customs.map(c => {
+                if (c.type === 'totp') {
+                    c.getTotpCode = () => {
+                        return totp(c.value);
+                    };
+                }
+            });
+
+            return customs;
         }
     }
 
