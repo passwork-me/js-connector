@@ -34,6 +34,11 @@ async function passwordExamples (passwork, env)  {
                 value: 'password1',
                 type:  'password'
             },
+            {
+                name:  'TOTP 1',
+                value: 'JBSWY3DPEHPK3PXP',
+                type:  'totp'
+            },
         ],
         attachments: [
             {

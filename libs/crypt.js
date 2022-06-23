@@ -459,5 +459,9 @@ module.exports = options => {
             }
             return result;
         },
+        isBase32: function (input) {
+            const regex = /^([A-Z2-7=]{8})+$/
+            return regex.test(input)
+        }
     };
 };

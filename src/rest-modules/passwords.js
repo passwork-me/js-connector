@@ -15,6 +15,12 @@ module.exports = function (options, request, api, {fileManager}) {
         }
     }
 
+    const validateCustoms = (customs) => {
+        if (customs.some(f => f.type === 'totp' && !cryptoInterface.isBase32(f.value))) {
+            throw {code: 'invalidTotpFormat'};
+        }
+    };
+
     const enrichCustoms = (password, vault) => {
         password.getCustoms = () => {
             if (!password.custom) {
@@ -71,6 +77,7 @@ module.exports = function (options, request, api, {fileManager}) {
         delete fields.password;
 
         if (fields.hasOwnProperty('custom') && fields.custom.length > 0) {
+            validateCustoms(fields.custom);
             fields.custom = passworkLib.encryptCustoms(fields.custom, vault);
         }
         if (fileManager.canUseFs && fields.hasOwnProperty('attachments') && fields.attachments.length > 0) {
@@ -92,6 +99,7 @@ module.exports = function (options, request, api, {fileManager}) {
             delete fields.password;
         }
         if (fields.hasOwnProperty('custom') && fields.custom.length > 0) {
+            validateCustoms(fields.custom);
             fields.custom = passworkLib.encryptCustoms(fields.custom, vault);
         }
         if (fileManager.canUseFs && fields.hasOwnProperty('attachments')) {
