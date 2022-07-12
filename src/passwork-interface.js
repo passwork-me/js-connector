@@ -30,6 +30,22 @@ PassworkAPI.prototype.setAuthOptions = (apiToken, masterPassword = false) => {};
 PassworkAPI.prototype.setOptions = (options) => {};
 
 /**
+ * Get 2FA status (idle, waiting)
+ * @param userId
+ * @param totpSecret
+ * @returns {Promise}
+ */
+PassworkAPI.prototype.twoFactorAuthStatus = (userId, totpSecret) => throw new Error('not implemented');
+
+/**
+ * Set 2FA as verified if status was "waiting"
+ * @param userId
+ * @param totpSecret
+ * @returns {Promise}
+ */
+PassworkAPI.prototype.twoFactorAuthVerify = (userId, totpSecret) => throw new Error('not implemented');
+
+/**
  * Logout
  * @see POST: /auth/logout
  * @return {Promise}

@@ -1,4 +1,5 @@
 module.exports = function (options, request, api) {
+    const cryptoInterface = require("../../libs/crypt")(options);
 
     api.login = (apiKey, masterPassword = null) => {
         options.masterPassword = masterPassword ? masterPassword : false;
@@ -30,6 +31,17 @@ module.exports = function (options, request, api) {
                 resolve()
             }).catch(err => reject(err));
         });
+    };
+
+    api.twoFactorAuthStatus = (userId, totpSecret) => {
+        const sign = cryptoInterface.hash(`${userId}${totpSecret}`);
+        return request.post('/2fa/status', {userId, sign})
+    };
+
+    api.twoFactorAuthVerify = (userId, totpSecret) => {
+        const sign = cryptoInterface.hash(`${userId}${totpSecret}`);
+        const timestamp = Math.floor(Date.now() / 1000);
+        return request.post('/2fa/verify', {userId, sign, timestamp});
     };
 
     api.userInfo = () => request.get('/user/info');
