@@ -13,6 +13,7 @@ module.exports = function (options, request, api) {
                 return request.post(`/auth/login/${apiKey}`, {useMasterPassword: options.useMasterPassword});
             }).then(data => {
                 options.token = data.token;
+                options.refreshToken = data.refreshToken ? data.refreshToken : '';
                 data.versionInfo = versionInfo;
                 resolve(data);
             }).catch(err => {

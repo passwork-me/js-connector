@@ -18,6 +18,7 @@ module.exports = function (host, services = null) {
     const _options = {
         host:              host,
         token:             '',
+        refreshToken:      '',
         masterPassword:    false,
         useMasterPassword: false,
         debug:             false,
