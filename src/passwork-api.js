@@ -27,7 +27,13 @@ module.exports = function (host, services = null) {
     };
 
     this.setAuthOptions = (apiToken, masterPass = false) => {
-        _options.token = apiToken;
+        if (typeof apiToken === 'string') {
+            apiToken = {token: apiToken}
+        }
+
+        _options.token = apiToken.token;
+        _options.refreshToken = apiToken.refreshToken ? apiToken.refreshToken : '';
+
         if (!!masterPass) {
             _options.masterPassword = masterPass;
             _options.useMasterPassword = true;
