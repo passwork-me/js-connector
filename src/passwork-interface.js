@@ -16,7 +16,7 @@ PassworkAPI.prototype.login = (apiKey, masterPassword = null) => throw new Error
 
 /**
  * Set apiToken and masterPassword directly without Login method call
- * @param {string|Object} apiToken
+ * @param {string|{token: string, refreshToken: string}} apiToken
  * @param {string|boolean} masterPassword
  */
 PassworkAPI.prototype.setAuthOptions = (apiToken, masterPassword = false) => {};
