@@ -28,7 +28,7 @@ module.exports = function (host, services = null) {
 
     this.setAuthOptions = (apiToken, masterPass = false) => {
         if (typeof apiToken === 'string') {
-            apiToken = {token: apiToken}
+            apiToken = {token: apiToken};
         }
 
         _options.token = apiToken.token;

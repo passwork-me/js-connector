@@ -38,18 +38,18 @@ module.exports = function (options) {
 
     this.handleApiSessionExpired = (e) => {
       if (!!options.refreshToken && e.response && e.response.body && e.response.body.code === 'apiSessionExpired') {
-        const token = options.token
-        options.token = ''
+        const token = options.token;
+        options.token = '';
 
         return this.request(`/auth/refreshToken/${token}/${options.refreshToken}`, 'POST').then(response => {
-          options.token = response.token
-          options.refreshToken = response.refreshToken
+          options.token = response.token;
+          options.refreshToken = response.refreshToken;
 
-          return Promise.resolve('retry')
+          return Promise.resolve('retry');
         })
       }
 
-      return Promise.reject(e)
+      return Promise.reject(e);
     }
 
     this.handleError = (e) => {
@@ -65,7 +65,7 @@ module.exports = function (options) {
           httpRequest: e.endpoint,
           httpStatus:  'serverError',
           httpMessage: 'serverError',
-        }
+        };
       }
     }
 };
