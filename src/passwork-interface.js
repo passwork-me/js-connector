@@ -51,6 +51,13 @@ PassworkAPI.prototype.version = () => throw new Error('not implemented');
 PassworkAPI.prototype.userInfo = () => throw new Error('not implemented');
 
 /**
+ * Get extension secret
+ * @see GET: /user/extension-secret
+ * @return {Promise}
+ */
+PassworkAPI.prototype.extensionSecret = () => throw new Error('not implemented');
+
+/**
  * Get last user notifications
  * @see POST: /user/notifications
  * @param {number} page

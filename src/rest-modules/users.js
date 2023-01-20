@@ -34,6 +34,8 @@ module.exports = function (options, request, api) {
 
     api.userInfo = () => request.get('/user/info');
 
+    api.extensionSecret = () => request.get('/user/extension-secret');
+
     api.userNotifications = (page = 1, limit = 10) => request.post('/user/notifications', {page, limit});
 
     api.userNotificationsCountNew = () => request.get('/user/notifications/count-new');
