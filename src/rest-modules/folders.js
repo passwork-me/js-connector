@@ -42,8 +42,8 @@ module.exports = function (options, request, api) {
         let action = copy ? 'copy' : 'move';
         let sourceVault = await api.getVault((await api.getFolder(folderId)).vaultId);
         let targetVault = sourceVault.id === vaultTo ? sourceVault : await api.getVault(vaultTo);
-        let sourceVaultMaster = passworkLib.getVaultMaster(sourceVault);
-        let targetVaultMaster = passworkLib.getVaultMaster(targetVault);
+        const sourceEncryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(sourceVault));
+        const targetEncryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(targetVault));
         let passwords = await getNestedPasswords(folderId);
         let data = {
             folderId, vaultTo, folderTo,
@@ -51,17 +51,17 @@ module.exports = function (options, request, api) {
         };
         for (const {id} of passwords) {
             let password = await api.getPassword(id);
-            data.cryptedPasswords[id] = passworkLib.encryptString(password.getPassword(), targetVault)
+            data.cryptedPasswords[id] = passworkLib.encryptString(password.getPassword(), targetEncryptionKey)
             if (password.hasOwnProperty('custom') && password.custom !== null) {
-                let decryptCustoms = passworkLib.decryptCustoms(password.custom, sourceVault);
-                data.custom[id] = passworkLib.encryptCustoms(decryptCustoms, targetVault);
+                let decryptCustoms = passworkLib.decryptCustoms(password.custom, sourceEncryptionKey);
+                data.custom[id] = passworkLib.encryptCustoms(decryptCustoms, targetEncryptionKey);
             }
             if (password.hasOwnProperty('attachments') && password.attachments !== null && password.attachments.length > 0) {
                 data.attachments[id] = [];
                 for (let {id: attachmentId, name, encryptedKey} of password.attachments) {
                     if (options.useMasterPassword) {
-                        let key = cryptoInterface.decode(encryptedKey, sourceVaultMaster);
-                        encryptedKey = cryptoInterface.encode(key, targetVaultMaster);
+                        let key = passworkLib.decryptString(encryptedKey, sourceEncryptionKey);
+                        encryptedKey = passworkLib.encryptString(key, targetEncryptionKey);
                     }
                     data.attachments[id].push({id: attachmentId, name, encryptedKey});
                 }

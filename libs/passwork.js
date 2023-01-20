@@ -2,67 +2,71 @@ module.exports = options => {
     const cryptoInterface = require("./crypt")(options);
 
     let self = {
-        getVaultMaster:            (vault) => {
+        useKeyEncryption: (vault) => {
+            return vault.vaultPasswordCrypted;
+        },
+        getVaultPassword: (vault) => {
             if (!options.useMasterPassword) {
                 return '';
             }
+            const pass = vault.passwordCrypted || vault.vaultPasswordCrypted;
             if (vault.scope === 'domain') {
                 let domainMaster = cryptoInterface.decode(vault.domainMaster, options.masterPassword);
-                return cryptoInterface.decode(vault.passwordCrypted, domainMaster);
+                return cryptoInterface.decode(pass, domainMaster);
             } else {
-                return cryptoInterface.decode(vault.passwordCrypted, options.masterPassword);
+                return cryptoInterface.decode(pass, options.masterPassword);
             }
         },
-        encryptString:             (password, vault, masterPassword = null) => {
+        getEncryptionKey: (passwordData, vaultPassword) => {
+            if (passwordData.cryptedKey) {
+                return cryptoInterface.decode(passwordData.cryptedKey, vaultPassword);
+            } else {
+                return vaultPassword;
+            }
+        },
+        encryptString:   (string, encryptionKey) => {
             if (options.useMasterPassword) {
-                masterPassword = masterPassword || self.getVaultMaster(vault);
-                return cryptoInterface.encode(password, masterPassword);
-            } else {
-                return cryptoInterface.base64encode(password)
+                return cryptoInterface.encode(string, encryptionKey);
             }
+            return cryptoInterface.base64encode(string)
         },
-        decryptString:             (password, vault, masterPassword = null) => {
+        decryptString:   (string, encryptionKey) => {
             if (options.useMasterPassword) {
-                masterPassword = masterPassword || self.getVaultMaster(vault);
-                return cryptoInterface.decode(password, masterPassword);
-            } else {
-                return cryptoInterface.base64decode(password);
+                return cryptoInterface.decode(string, encryptionKey);
             }
+            return cryptoInterface.base64decode(string)
         },
-        encryptCustoms:            (customFields, vault, masterPassword = null) => {
-            masterPassword = masterPassword || self.getVaultMaster(vault);
+        encryptCustoms: (customFields, encryptionKey) => {
             return customFields.map(custom => {
                 for (const field in custom) {
                     if (field !== 'name' && field !== 'value' && field !== 'type') {
                         return;
                     }
-                    custom[field] = self.encryptString(custom[field], vault, masterPassword);
+                    custom[field] = self.encryptString(custom[field], encryptionKey);
                 }
                 return custom;
             });
         },
-        decryptCustoms:            (customFields, vault, masterPassword = null) => {
-            masterPassword = masterPassword || self.getVaultMaster(vault);
+        decryptCustoms: (customFields, encryptionKey) => {
             let result = [];
             for (const custom of customFields) {
                 result.push({
-                    name:  self.decryptString(custom.name, vault, masterPassword),
-                    value: self.decryptString(custom.value, vault, masterPassword),
-                    type:  self.decryptString(custom.type, vault, masterPassword),
+                    name:  self.decryptString(custom.name, encryptionKey),
+                    value: self.decryptString(custom.value, encryptionKey),
+                    type:  self.decryptString(custom.type, encryptionKey),
                 });
             }
             return result;
         },
-        encryptPasswordAttachment: (buffer, vault, masterPassword = null) => {
+        encryptPasswordAttachment: (buffer, passwordEncryptionKey) => {
             let arrayBuffer = new Int8Array(buffer);
             if (arrayBuffer.byteLength > 1024 * 100) {
                 throw "Attached file max size is 100KB";
             }
             let key, encryptedKey, encryptedData;
             if (options.useMasterPassword) {
-                masterPassword = masterPassword || self.getVaultMaster(vault);
                 key = cryptoInterface.generateString(32);
-                encryptedKey = cryptoInterface.encode(key, masterPassword);
+                encryptedKey = cryptoInterface.encode(key, passwordEncryptionKey);
                 encryptedData = cryptoInterface.encodeFile(arrayBuffer, key);
             } else {
                 key = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
@@ -75,9 +79,8 @@ module.exports = options => {
                 hash: cryptoInterface.hash(cryptoInterface.getStringFromBlob(arrayBuffer)),
             };
         },
-        decryptPasswordAttachment: (attachment, vault, masterPassword = null) => {
-            masterPassword = masterPassword || self.getVaultMaster(vault);
-            let key = cryptoInterface.decode(attachment.encryptedKey, masterPassword);
+        decryptPasswordAttachment: (attachment, passwordEncryptionKey) => {
+            let key = cryptoInterface.decode(attachment.encryptedKey, passwordEncryptionKey);
             let byteCharacters = cryptoInterface.decodeFile(attachment.encryptedData, key);
             if (cryptoInterface.hash(byteCharacters) !== attachment.hash) {
                 throw "Can't decrypt attachment: hashes are not equal";
@@ -88,14 +91,14 @@ module.exports = options => {
             }
             return Uint8Array.from(byteNumbers);
         },
-        formatAttachments:         (attachments, vault, fileManager) => {
+        formatAttachments: (attachments, encryptionKey, fileManager) => {
             const result = [];
             for (let {path, name} of attachments) {
                 if (!path) {
                     continue;
                 }
                 try {
-                    let data = self.encryptPasswordAttachment(fileManager.readFile(path), vault);
+                    let data = self.encryptPasswordAttachment(fileManager.readFile(path), encryptionKey);
                     data.name = !name ? fileManager.getFileBasename(path) : name;
                     result.push(data);
                 } catch (e) {

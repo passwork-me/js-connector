@@ -4,11 +4,13 @@ module.exports = function (options, request, api, {fileManager}) {
     const totp = require("totp-generator");
 
     const enrichPassword = (password, vault) => {
-        password.getPassword = () => passworkLib.decryptString(password.cryptedPassword, vault);
+        const encryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault));
+        password.getPassword = () => passworkLib.decryptString(password.cryptedPassword, encryptionKey);
     }
 
     const enrichAttachment = (attachment, vault) => {
-        attachment.getData = () => passworkLib.decryptPasswordAttachment(attachment, vault);
+        const encryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault));
+        attachment.getData = () => passworkLib.decryptPasswordAttachment(attachment, encryptionKey);
         attachment.saveTo = (path, name = null) => {
             let fileName = name ? name : attachment.name;
             fileManager.saveToFile(path + fileName, attachment.getData());
@@ -22,12 +24,13 @@ module.exports = function (options, request, api, {fileManager}) {
     };
 
     const enrichCustoms = (password, vault) => {
+        const encryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault));
         password.getCustoms = () => {
             if (!password.custom) {
                 return null;
             }
 
-            let customs = passworkLib.decryptCustoms(password.custom, vault);
+            let customs = passworkLib.decryptCustoms(password.custom, encryptionKey);
             customs.map(c => {
                 if (c.type === 'totp') {
                     c.getTotpCode = () => {
@@ -71,17 +74,19 @@ module.exports = function (options, request, api, {fileManager}) {
     }
 
     api.addPassword = async (fields = {}) => {
-        let vault = await api.getVault(fields.vaultId);
+        const vault = await api.getVault(fields.vaultId);
+        const encryptionKey = passworkLib.useKeyEncryption(vault) ?
+            cryptoInterface.generateString(32) : passworkLib.getVaultPassword(vault);
 
-        fields.cryptedPassword = passworkLib.encryptString(fields.password, vault)
+        fields.cryptedPassword = passworkLib.encryptString(fields.password, encryptionKey);
         delete fields.password;
 
         if (fields.hasOwnProperty('custom') && fields.custom.length > 0) {
             validateCustoms(fields.custom);
-            fields.custom = passworkLib.encryptCustoms(fields.custom, vault);
+            fields.custom = passworkLib.encryptCustoms(fields.custom, encryptionKey);
         }
         if (fileManager.canUseFs && fields.hasOwnProperty('attachments') && fields.attachments.length > 0) {
-            fields.attachments = passworkLib.formatAttachments(fields.attachments, vault, fileManager);
+            fields.attachments = passworkLib.formatAttachments(fields.attachments, encryptionKey, fileManager);
         } else {
             delete fields.attachments;
         }
@@ -90,20 +95,39 @@ module.exports = function (options, request, api, {fileManager}) {
     };
 
     api.editPassword = async (passwordId, fields = {}) => {
-        let password = await request.get(`/passwords/${passwordId}`);
-        let vault = await api.getVault(password.vaultId);
+        const password = await request.get(`/passwords/${passwordId}`);
+        const vault = await api.getVault(password.vaultId);
+        const vaultPassword = passworkLib.getVaultPassword(vault);
+        let encryptionKey;
+        if (password.cryptedKey) {
+            encryptionKey = passwordService.getEncryptionKey(password, vaultPassword);
+        } else {
+            if (passworkLib.useKeyEncryption(vault)) {
+                encryptionKey = cryptoInterface.generateString(32);
+            } else {
+                encryptionKey = vaultPassword;
+            }
+        }
+
         let data = {};
         if (fields.hasOwnProperty('password')) {
-            data.cryptedPassword = passworkLib.encryptString(fields.password, vault);
+            data.cryptedPassword = passworkLib.encryptString(fields.password, encryptionKey);
+            if (passworkLib.useKeyEncryption(vault)) {
+                if (password.cryptedKey) {
+                    data.cryptedKey = password.cryptedKey;
+                } else {
+                    data.cryptedKey = cryptoInterface.generateString(32)
+                }
+            }
             data.passwordFieldChanged = true;
             delete fields.password;
         }
         if (fields.hasOwnProperty('custom') && fields.custom.length > 0) {
             validateCustoms(fields.custom);
-            fields.custom = passworkLib.encryptCustoms(fields.custom, vault);
+            fields.custom = passworkLib.encryptCustoms(fields.custom, encryptionKey);
         }
         if (fileManager.canUseFs && fields.hasOwnProperty('attachments')) {
-            fields.attachments = passworkLib.formatAttachments(fields.attachments, vault, fileManager);
+            fields.attachments = passworkLib.formatAttachments(fields.attachments, encryptionKey, fileManager);
         } else {
             delete fields.attachments;
         }
@@ -126,7 +150,8 @@ module.exports = function (options, request, api, {fileManager}) {
     api.addPasswordAttachment = async (passwordId, attachmentPath, attachmentName = null) => {
         let password = await api.getPassword(passwordId);
         let vault = await api.getVault(password.vaultId);
-        let data = passworkLib.encryptPasswordAttachment(fileManager.readFile(attachmentPath), vault)
+        const passwordEncryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault))
+        let data = passworkLib.encryptPasswordAttachment(fileManager.readFile(attachmentPath), passwordEncryptionKey)
         data.name = !attachmentName ? fileManager.getFileBasename(attachmentPath) : attachmentName
 
         return request.post(`/passwords/${passwordId}/attachment`, data);
@@ -170,17 +195,17 @@ module.exports = function (options, request, api, {fileManager}) {
         let oneTimePasswordHash = null;
         let oneTimePasswordCrypted = null;
         if (oneTimePassword) {
-            password.cryptedPassword = password.getPassword();
+            const vault = await api.getVault(password.vaultId);
+            const encryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault));
             // Encode password, customs, attachments with one time password
-            password.cryptedPassword = passworkLib.encryptString(password.cryptedPassword, null, oneTimePassword);
+            password.cryptedPassword = passworkLib.encryptString(password.getPassword(), oneTimePassword);
             if (password.custom && password.custom.length) {
-                password.custom = passworkLib.encryptCustoms(password.custom, null, oneTimePassword);
+                password.custom = passworkLib.encryptCustoms(password.custom, oneTimePassword);
             }
             if (password.attachments && password.attachments.length) {
-                const vault = await api.getVault(password.vaultId);
                 password.attachments.map(attachment => {
-                    let key = passworkLib.decryptString(attachment.encryptedKey, vault);
-                    attachment.encryptedKey = passworkLib.encryptString(key, null, oneTimePassword);
+                    let key = passworkLib.decryptString(attachment.encryptedKey, encryptionKey);
+                    attachment.encryptedKey = passworkLib.encryptString(key, oneTimePassword);
                 });
             }
             oneTimePasswordHash = cryptoInterface.hash(oneTimePassword);
@@ -193,8 +218,9 @@ module.exports = function (options, request, api, {fileManager}) {
         if (v5) {
             let type = reusable ? 'reusable' : 'onetime';
             const vault = await api.getVault(password.vaultId);
+            const encryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault));
             if (oneTimePassword) {
-                oneTimePasswordCrypted = passworkLib.encryptString(oneTimePassword, vault);
+                oneTimePasswordCrypted = passworkLib.encryptString(oneTimePassword, encryptionKey);
             }
             data = {password, ttl: time, type, passwordHash: oneTimePasswordHash, oneTimePasswordCrypted};
         } else {
@@ -213,34 +239,58 @@ module.exports = function (options, request, api, {fileManager}) {
     api.getInboxPasswordsCount = () => request.get("/sharing/inbox/count");
 
     api.getInboxPassword = async (inboxId) => {
-        const fetchPassword = async (firstTimeOpen, groupPasswordCrypted, privateCryptedKey) => {
-            const requestData = {passwordCrypted: ''};
-            // Send encrypted group password if inbox opened for the first time
-            if (firstTimeOpen) {
-                let groupPassword = '';
-                if (!options.useMasterPassword) {
-                    groupPassword = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-                } else if (groupPasswordCrypted && privateCryptedKey) {
-                    const decryptedKey = cryptoInterface.decode(privateCryptedKey, options.masterPassword);
-                    groupPassword = cryptoInterface.rsaDecrypt(groupPasswordCrypted, decryptedKey);
-                }
-                if (groupPassword) {
-                    requestData.passwordCrypted = cryptoInterface.encode(groupPassword, options.masterPassword);
-                    requestData.silent = false;
-                }
-            }
-            return request.post(`/sharing/inbox/${inboxId}`, requestData);
-        };
+        let inboxPassword = await request.post(`/sharing/inbox/${inboxId}`);
 
-        let inboxPassword = await fetchPassword();
-        if (!inboxPassword.viewed) {
+        if (inboxPassword.cryptedKey) {
             const user = await api.userInfo();
-            inboxPassword = await fetchPassword(true, inboxPassword.groupPasswordCrypted, user.keys.privateCrypted);
-        }
+            // todo! check without encryption
+            const encryptionKey = cryptoInterface.rsaDecrypt(inboxPassword.cryptedKey,
+                passworkLib.decryptString(user.keys.privateCrypted, options.masterPassword));
 
-        const vault = await api.getVault(inboxPassword.vaultId);
-        enrichPassword(inboxPassword.password, vault);
-        enrichCustoms(inboxPassword.password, vault);
+            inboxPassword.password.getPassword = () => {
+                return passworkLib.decryptString(inboxPassword.password.cryptedPassword, encryptionKey);
+            };
+            inboxPassword.password.getCustoms = () => {
+                let customs = null;
+                if (inboxPassword.password.custom) {
+                    customs = passworkLib.decryptCustoms(inboxPassword.password.custom, encryptionKey);
+                    customs.map(c => {
+                        if (c.type === 'totp') {
+                            c.getTotpCode = () => totp(c.value);
+                        }
+                    });
+                }
+                return customs;
+            }
+        } else {
+            const fetchPassword = async (firstTimeOpen, groupPasswordCrypted, privateCryptedKey) => {
+                const requestData = {passwordCrypted: ''};
+                if (firstTimeOpen) {
+                    // Send encrypted group password if inbox opened for the first time
+                    let groupPassword = '';
+                    if (!options.useMasterPassword) {
+                        groupPassword = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+                    } else if (groupPasswordCrypted && privateCryptedKey) {
+                        const decryptedKey = passworkLib.decryptString(privateCryptedKey,options.masterPassword);
+                        groupPassword = cryptoInterface.rsaDecrypt(groupPasswordCrypted, decryptedKey);
+                    }
+                    if (groupPassword) {
+                        requestData.passwordCrypted = passworkLib.encryptString(groupPassword, options.masterPassword);
+                        requestData.silent = false;
+                    }
+                }
+                return request.post(`/sharing/inbox/${inboxId}`, requestData);
+            };
+            inboxPassword = await fetchPassword();
+            if (!inboxPassword.viewed) {
+                const user = await api.userInfo();
+                inboxPassword = await fetchPassword(true, inboxPassword.groupPasswordCrypted, user.keys.privateCrypted);
+            }
+            const vault = await api.getVault(inboxPassword.vaultId);
+
+            enrichPassword(inboxPassword.password, vault);
+            enrichCustoms(inboxPassword.password, vault);
+        }
 
         return inboxPassword;
     };
@@ -255,17 +305,19 @@ module.exports = function (options, request, api, {fileManager}) {
         let sourceVault = await api.getVault(password.vaultId);
         let targetVault = password.vaultId === vaultTo ? sourceVault : await api.getVault(vaultTo);
         let data = {passwordId, vaultTo, folderTo};
-        data.cryptedPassword = passworkLib.encryptString(password.getPassword(), targetVault);
+        const sourceEncryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(sourceVault));
+        const targetEncryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(targetVault));
+        data.cryptedPassword = passworkLib.encryptString(password.getPassword(), targetEncryptionKey);
         if (password.hasOwnProperty('custom') && password.custom !== null) {
-            let decryptCustoms = passworkLib.decryptCustoms(password.custom, sourceVault);
-            data.custom = passworkLib.encryptCustoms(decryptCustoms, targetVault);
+            let decryptCustoms = passworkLib.decryptCustoms(password.custom, sourceEncryptionKey);
+            data.custom = passworkLib.encryptCustoms(decryptCustoms, targetEncryptionKey);
         }
         if (password.hasOwnProperty('attachments') && password.attachments !== null && password.attachments.length > 0) {
             data.attachments = [];
             for (let {id, name, encryptedKey} of password.attachments) {
                 if (options.useMasterPassword) {
-                    let key = cryptoInterface.decode(encryptedKey, passworkLib.getVaultMaster(sourceVault));
-                    encryptedKey = cryptoInterface.encode(key, passworkLib.getVaultMaster(targetVault))
+                    let key = passworkLib.decryptString(encryptedKey, sourceEncryptionKey);
+                    encryptedKey = passworkLib.encryptString(key, targetEncryptionKey)
                 }
                 data.attachments.push({id, name, encryptedKey});
             }
@@ -274,7 +326,7 @@ module.exports = function (options, request, api, {fileManager}) {
     }
 
     function makeSnapshot(password, vault) {
-        let vaultPass = passworkLib.getVaultMaster(vault)
+        const encryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault));
         let sData = {...password};
         enrichPassword(password, vault);
         enrichCustoms(password, vault);
@@ -284,7 +336,7 @@ module.exports = function (options, request, api, {fileManager}) {
         sData.groupId = sData.vaultId;
         if (sData.attachments && options.useMasterPassword) {
             sData.attachments = sData.attachments.map(function (att) {
-                return {id: att.id, name: att.name, key: cryptoInterface.decode(att.encryptedKey, vaultPass)};
+                return {id: att.id, name: att.name, key: passworkLib.decryptString(att.encryptedKey, encryptionKey)};
             });
         }
 
@@ -296,12 +348,6 @@ module.exports = function (options, request, api, {fileManager}) {
             }
         }
 
-        sData = JSON.stringify(sData);
-        if (options.useMasterPassword) {
-            sData = cryptoInterface.encode(sData, vaultPass);
-        } else {
-            sData = cryptoInterface.base64encode(sData);
-        }
-        return sData;
+        return passworkLib.encryptString(JSON.stringify(sData), encryptionKey);
     }
 };
