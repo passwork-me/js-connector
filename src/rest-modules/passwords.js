@@ -243,9 +243,14 @@ module.exports = function (options, request, api, {fileManager}) {
 
         if (inboxPassword.cryptedKey) {
             const user = await api.userInfo();
-            // todo! check without encryption
-            const encryptionKey = cryptoInterface.rsaDecrypt(inboxPassword.cryptedKey,
-                passworkLib.decryptString(user.keys.privateCrypted, options.masterPassword));
+
+            let encryptionKey;
+            if (options.useMasterPassword && user.keys) {
+                encryptionKey = cryptoInterface.rsaDecrypt(inboxPassword.cryptedKey,
+                    passworkLib.decryptString(user.keys.privateCrypted, options.masterPassword));
+            } else {
+                encryptionKey = cryptoInterface.base64decode(inboxPassword.cryptedKey);
+            }
 
             inboxPassword.password.getPassword = () => {
                 return passworkLib.decryptString(inboxPassword.password.cryptedPassword, encryptionKey);
