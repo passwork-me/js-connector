@@ -225,7 +225,11 @@ module.exports = function (options, request, api, {fileManager}) {
                     groupPassword = cryptoInterface.rsaDecrypt(groupPasswordCrypted, decryptedKey);
                 }
                 if (groupPassword) {
-                    requestData.passwordCrypted = cryptoInterface.encode(groupPassword, options.masterPassword);
+                    if (options.useMasterPassword) {
+                        requestData.passwordCrypted = cryptoInterface.encode(groupPassword, options.masterPassword);
+                    } else {
+                        requestData.passwordCrypted = cryptoInterface.base64encode(groupPassword);
+                    }
                     requestData.silent = false;
                 }
             }
@@ -235,7 +239,8 @@ module.exports = function (options, request, api, {fileManager}) {
         let inboxPassword = await fetchPassword();
         if (!inboxPassword.viewed) {
             const user = await api.userInfo();
-            inboxPassword = await fetchPassword(true, inboxPassword.groupPasswordCrypted, user.keys.privateCrypted);
+            const privateKey = options.useMasterPassword ? user.keys.privateCrypted : null;
+            inboxPassword = await fetchPassword(true, inboxPassword.groupPasswordCrypted, privateKey);
         }
 
         const vault = await api.getVault(inboxPassword.vaultId);
