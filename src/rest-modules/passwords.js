@@ -75,10 +75,14 @@ module.exports = function (options, request, api, {fileManager}) {
 
     api.addPassword = async (fields = {}) => {
         const vault = await api.getVault(fields.vaultId);
+        const vaultPassword = passworkLib.getVaultPassword(vault);
         const encryptionKey = passworkLib.useKeyEncryption(vault) ?
-            cryptoInterface.generateString(32) : passworkLib.getVaultPassword(vault);
+            cryptoInterface.generateString(32) : vaultPassword;
 
         fields.cryptedPassword = passworkLib.encryptString(fields.password, encryptionKey);
+        if (passworkLib.useKeyEncryption(vault)) {
+            fields.cryptedKey = passworkLib.encryptString(encryptionKey, vaultPassword);
+        }
         delete fields.password;
 
         if (fields.hasOwnProperty('custom') && fields.custom.length > 0) {
@@ -98,27 +102,11 @@ module.exports = function (options, request, api, {fileManager}) {
         const password = await request.get(`/passwords/${passwordId}`);
         const vault = await api.getVault(password.vaultId);
         const vaultPassword = passworkLib.getVaultPassword(vault);
-        let encryptionKey;
-        if (password.cryptedKey) {
-            encryptionKey = passwordService.getEncryptionKey(password, vaultPassword);
-        } else {
-            if (passworkLib.useKeyEncryption(vault)) {
-                encryptionKey = cryptoInterface.generateString(32);
-            } else {
-                encryptionKey = vaultPassword;
-            }
-        }
+        const encryptionKey = passworkLib.getEncryptionKey(password, vaultPassword)
 
         let data = {};
         if (fields.hasOwnProperty('password')) {
             data.cryptedPassword = passworkLib.encryptString(fields.password, encryptionKey);
-            if (passworkLib.useKeyEncryption(vault)) {
-                if (password.cryptedKey) {
-                    data.cryptedKey = password.cryptedKey;
-                } else {
-                    data.cryptedKey = cryptoInterface.generateString(32)
-                }
-            }
             data.passwordFieldChanged = true;
             delete fields.password;
         }
