@@ -1,3 +1,4 @@
+const cryptoInterfaceFactory = require('../libs/crypt')
 const restModules = [
     require("./rest-modules/passwords"),
     require("./rest-modules/users"),
@@ -26,14 +27,25 @@ module.exports = function (host, services = null) {
     };
 
     this.setAuthOptions = (apiToken, masterPass = false) => {
-        _options.token = apiToken;
-        if (!!masterPass) {
-            _options.masterPassword = masterPass;
-            _options.useMasterPassword = true;
-        } else {
-            _options.masterPassword = false;
-            _options.useMasterPassword = false;
-        }
+        return new Promise((resolve, reject) => {
+            _options.token = apiToken;
+            if (!!masterPass) {
+                _options.masterPassword = masterPass;
+                _options.useMasterPassword = true;
+            } else {
+                _options.masterPassword = false;
+                _options.useMasterPassword = false;
+            }
+
+            this.loadMasterKey(_options)
+              .then(masterKey => {
+                  _options.masterPassword = masterKey
+                  resolve()
+              })
+              .catch(error => {
+                  reject(error)
+              })
+        })
     };
 
     this.setOptions = (options) => {
@@ -50,5 +62,35 @@ module.exports = function (host, services = null) {
 
     const request = new services.agent(_options).request;
     restModules.forEach(m => new m(_options, request, this, services));
+
+    this.loadMasterKey = (options) => {
+        return new Promise((resolve, reject) => {
+            if (!options.useMasterPassword) {
+                resolve(false);
+                return;
+            }
+
+            request.get('/user/get-master-key-options').then(data => {
+                if (!data || !data.mkOptions) {
+                    resolve(options.masterPassword);
+
+                    return;
+                }
+
+                const cryptoFactory = cryptoInterfaceFactory(options);
+                const hashOptions = cryptoFactory.parseOptions(data.mkOptions);
+                cryptoFactory.createSaltedHash(options.masterPassword, hashOptions, (masterKey) => {
+                    resolve(masterKey);
+                })
+            }).catch(err => {
+                if (err && err.httpStatus === 404) {
+                    resolve(options.masterPassword);
+                    return;
+                }
+
+                return reject(err)
+            });
+        })
+    }
 
 };

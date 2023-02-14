@@ -45,8 +45,8 @@ module.exports = function (options, request, api) {
     api.addVault = (name, isPrivate = false) => request.get('/vaults/domain').then(domain => {
         let data;
         if (options.useMasterPassword) {
-            let groupPwd = cryptoInterface.generateString(32);
-            let salt = cryptoInterface.generateString(32);
+            let groupPwd = cryptoInterface.generateVaultMasterPassword();
+            let salt = cryptoInterface.generateVaultSalt();
             data = {name, salt};
             if (isPrivate) {
                 data.passwordCrypted = cryptoInterface.encode(groupPwd, options.masterPassword)

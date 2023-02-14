@@ -14,7 +14,14 @@ module.exports = function (options, request, api) {
             }).then(data => {
                 options.token = data.token;
                 data.versionInfo = versionInfo;
-                resolve(data);
+                return data;
+            }).then(data => {
+                api.loadMasterKey(options)
+                  .then(masterKey => {
+                      options.masterPassword = masterKey
+                      resolve(data)
+                  })
+                  .catch(error => reject(error))
             }).catch(err => {
                 if (err.code === 'clientSideEncryptionDisabled') {
                     err.data.errorMessage = 'Do not use master password with disabled client side encryption'

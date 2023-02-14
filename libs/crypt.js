@@ -1,5 +1,6 @@
 const JSEncrypt = require('node-jsencrypt');
 const CryptoJS = require('crypto-js');
+const pbkdf2 = require('pbkdf2');
 const cryptoRandomString = require('crypto-random-string-with-promisify-polyfill');
 const base32 = require("./base32");
 const sha256 = require('js-sha256').sha256;
@@ -462,6 +463,61 @@ module.exports = options => {
         isBase32: function (input) {
             const regex = /^([A-Z2-7=]{8})+$/
             return regex.test(input)
+        },
+        generatePasswordAttachmentKey: function () {
+            return this.generateString(32)
+        },
+        generateOneTimePassword: function () {
+            return this.generateString(100)
+        },
+        generateVaultMasterPassword: function () {
+            return this.generateString(100)
+        },
+        generateVaultSalt: function () {
+            return this.generateString(32)
+        },
+        parseOptions: function (mkOptions) {
+            let match = /^(.+?):.+/.exec(mkOptions);
+
+            switch (match ? match[1] : '') {
+                case 'pbkdf':
+                    match = /^(?<type>pbkdf):(?<digest>.+):(?<iterations>.+):(?<bytes>.+):(?<salt>.+)$/mgi.exec(mkOptions);
+                    if (match == null) {
+                        throw Error('Could not parse a hash')
+                    }
+
+                    return match.groups
+                default:
+                    return {}
+            }
+        },
+        createSaltedHash: function (value, mkOptions, cb) {
+            switch (mkOptions.type) {
+                case 'pbkdf':
+                    if (!mkOptions.salt) {
+                        throw Error('No salt provided');
+                    }
+
+                    const salt = mkOptions.salt
+                    const iterations = mkOptions.iterations ? parseInt(mkOptions.iterations) : 300000
+                    const bytes = mkOptions.bytes ? parseInt(mkOptions.bytes) : 64
+                    const digest = mkOptions.digest ? mkOptions.digest : 'sha256'
+
+                    pbkdf2.pbkdf2(value, salt, iterations, bytes, digest, (error, result) => {
+                        if (error) {
+                            throw Error('Could not generate a hash');
+                        }
+
+                        // ex: key, 'pbkdf:sha256:300000:64:salt'
+                        cb(result.toString('base64'), ['pbkdf', digest, iterations, bytes, salt].join(':'));
+                    })
+
+                    break;
+                default:
+                    cb(value, '')
+
+                    break;
+            }
         }
     };
 };
