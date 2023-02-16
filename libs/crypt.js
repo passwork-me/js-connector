@@ -465,7 +465,7 @@ module.exports = options => {
             return regex.test(input)
         },
         generatePasswordAttachmentKey: function () {
-            return this.generateString(32)
+            return this.generateString(100)
         },
         generateOneTimePassword: function () {
             return this.generateString(100)
