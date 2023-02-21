@@ -19,6 +19,7 @@ module.exports = function (host, services = null) {
     const _options = {
         host:              host,
         token:             '',
+        refreshToken:      '',
         masterPassword:    false,
         useMasterPassword: false,
         debug:             false,
@@ -28,7 +29,13 @@ module.exports = function (host, services = null) {
 
     this.setAuthOptions = (apiToken, masterPass = false) => {
         return new Promise((resolve, reject) => {
-            _options.token = apiToken;
+            if (typeof apiToken === 'string') {
+                apiToken = {token: apiToken};
+            }
+
+            _options.token = apiToken.token;
+            _options.refreshToken = apiToken.refreshToken ? apiToken.refreshToken : '';
+
             if (!!masterPass) {
                 _options.masterPassword = masterPass;
                 _options.useMasterPassword = true;
