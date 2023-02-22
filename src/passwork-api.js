@@ -27,7 +27,7 @@ module.exports = function (host, services = null) {
         hash:              'sha256',
     };
 
-    this.setAuthOptions = (apiToken, masterPass = false) => {
+    this.setAuthOptions = (apiToken, masterPass = null, masterKey = null) => {
         return new Promise((resolve, reject) => {
             if (typeof apiToken === 'string') {
                 apiToken = {token: apiToken};
@@ -35,6 +35,12 @@ module.exports = function (host, services = null) {
 
             _options.token = apiToken.token;
             _options.refreshToken = apiToken.refreshToken ? apiToken.refreshToken : '';
+
+            if (masterKey) {
+                _options.masterPassword = masterKey;
+                _options.useMasterPassword = true;
+                return resolve();
+            }
 
             if (!!masterPass) {
                 _options.masterPassword = masterPass;
