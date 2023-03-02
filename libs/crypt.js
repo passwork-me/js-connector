@@ -4,8 +4,7 @@ const pbkdf2 = require('pbkdf2');
 const cryptoRandomString = require('crypto-random-string-with-promisify-polyfill');
 const base32 = require("./base32");
 const sha256 = require('js-sha256').sha256;
-const atob = require('atob');
-const btoa = require('btoa');
+const abab = require('abab');
 
 
 module.exports = options => {
@@ -439,9 +438,9 @@ module.exports = options => {
         },
         encodeFile: function (data, passkey = null) {
             if (!passkey) {
-                return this.base64encode(btoa(this.getStringFromBlob(data)));
+                return this.base64encode(abab.btoa(this.getStringFromBlob(data)));
             } else {
-                return this.encode(btoa(this.getStringFromBlob(data)), passkey);
+                return this.encode(abab.btoa(this.getStringFromBlob(data)), passkey);
             }
         },
         decodeFile: function (data, passkey = null) {
@@ -450,7 +449,7 @@ module.exports = options => {
             } else {
                 data = this.decode(data, passkey);
             }
-            return atob(data)
+            return abab.atob(data)
         },
         getStringFromBlob: function (blob) {
             const data = new Uint8Array(blob);

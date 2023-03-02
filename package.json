@@ -2,8 +2,7 @@
   "name": "passwork-js",
   "version": "1.2.7",
   "dependencies": {
-    "atob": "^2.1.2",
-    "btoa": "^1.2.1",
+    "abab": "^2.0.6",
     "crypto-js": "^4.0.0",
     "crypto-random-string-with-promisify-polyfill": "5.0.0",
     "dotenv": "^8.2.0",
