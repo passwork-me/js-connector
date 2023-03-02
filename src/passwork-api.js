@@ -82,6 +82,10 @@ module.exports = function (host, services = null) {
                 resolve(false);
                 return;
             }
+            if (!options.refreshToken) {
+                resolve(options.masterPassword);
+                return;
+            }
 
             request.get('/user/get-master-key-options').then(data => {
                 if (!data || !data.mkOptions) {
