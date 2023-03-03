@@ -8,16 +8,19 @@ const restModules = [
 ];
 
 /**
- * @param host
+ * @param options
  * @param services
  * @implements PassworkAPI
  */
-module.exports = function (host, services = null) {
+module.exports = function (options, services = null) {
+    if (typeof options === 'string') {
+        options = {host: options}
+    }
     if (!services) {
         services = require('./services');
     }
     const _options = {
-        host:              host,
+        host:              options.host,
         token:             '',
         refreshToken:      '',
         masterPassword:    false,
@@ -25,7 +28,11 @@ module.exports = function (host, services = null) {
         debug:             false,
         lang:              null,
         hash:              'sha256',
+        useFetchApi:       false,
     };
+    for (const key in options) {
+        _options[key] = options[key];
+    }
 
     this.setAuthOptions = (apiToken, masterPass = null, masterKey = null) => {
         return new Promise((resolve, reject) => {
