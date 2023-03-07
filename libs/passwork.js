@@ -61,7 +61,7 @@ module.exports = options => {
             let key, encryptedKey, encryptedData;
             if (options.useMasterPassword) {
                 masterPassword = masterPassword || self.getVaultMaster(vault);
-                key = cryptoInterface.generateString(32);
+                key = cryptoInterface.generatePasswordAttachmentKey();
                 encryptedKey = cryptoInterface.encode(key, masterPassword);
                 encryptedData = cryptoInterface.encodeFile(arrayBuffer, key);
             } else {

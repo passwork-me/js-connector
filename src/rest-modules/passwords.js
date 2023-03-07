@@ -152,7 +152,7 @@ module.exports = function (options, request, api, {fileManager}) {
 
         let oneTimePassword = null;
         if (options.useMasterPassword && (v5 || !secret)) {
-            oneTimePassword = cryptoInterface.generateString(32);
+            oneTimePassword = cryptoInterface.generateOneTimePassword();
         }
 
         if (!v5) {
