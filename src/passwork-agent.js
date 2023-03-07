@@ -14,37 +14,16 @@ module.exports = function (options) {
             console.log(requestUrl);
         }
 
-        if (options.useFetchApi) {
-            fetch(options.host + endpoint, {
-                method: method,
-                mode: 'cors',
-                headers: {
-                    'Passwork-Auth': options.token,
-                    'Passwork-MasterHash': cryptoInterfaceFactory(options).hash(options.masterPassword),
-                    'Passwork-Lang': options.lang,
-                },
-                body: JSON.stringify(body),
-            }).then(response => response.json()).then(res => {
-                if (res.status === 'error') {
-                    throw res;
-                }
-                resolve(res.data);
-            }).catch(err => {
+        _method[method](options.host + endpoint)
+            .send(body)
+            .set('Passwork-Auth', options.token)
+            .set('Passwork-MasterHash', cryptoInterfaceFactory(options).hash(options.masterPassword))
+            .set('Passwork-Lang', options.lang)
+            .then(res => resolve(res.body.data))
+            .catch(err => {
                 err.endpoint = requestUrl;
-                reject(err);
+                return reject(err);
             });
-        } else {
-            _method[method](options.host + endpoint)
-                .send(body)
-                .set('Passwork-Auth', options.token)
-                .set('Passwork-MasterHash', cryptoInterfaceFactory(options).hash(options.masterPassword))
-                .set('Passwork-Lang', options.lang)
-                .then(res => resolve(res.body.data))
-                .catch(err => {
-                    err.endpoint = requestUrl;
-                    return reject(err);
-                });
-        }
     });
 
     for (const key in _method) {

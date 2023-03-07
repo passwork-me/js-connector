@@ -28,7 +28,6 @@ module.exports = function (options, services = null) {
         debug:             false,
         lang:              null,
         hash:              'sha256',
-        useFetchApi:       false,
     };
     for (const key in options) {
         _options[key] = options[key];
