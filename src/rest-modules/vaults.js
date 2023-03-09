@@ -58,8 +58,8 @@ module.exports = function (options, request, api) {
             data = {
                 name,
                 salt:            'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-                passwordCrypted: 'YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE',
-                mpCrypted:       'YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE',
+                passwordCrypted: 'YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=',
+                mpCrypted:       'YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=',
                 passwordHash:    'ffe054fe7ae0cb6dc65c3af9b61d5209f439851db43d0ba5997337df154668eb',
             }
         }
