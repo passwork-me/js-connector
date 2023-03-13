@@ -16,7 +16,7 @@ module.exports = function (options, request, api, {fileManager}) {
     }
 
     const validateCustoms = (customs) => {
-        if (customs.some(f => f.type === 'totp' && !cryptoInterface.isBase32(f.value))) {
+        if (customs.some(f => f.type === 'totp' && !cryptoInterface.isValidTotp(f.value))) {
             throw {code: 'invalidTotpFormat'};
         }
     };
