@@ -132,6 +132,18 @@ module.exports = function (options, request, api, {fileManager}) {
         return request.post(`/passwords/${passwordId}/attachment`, data);
     }
 
+    api.addPasswordWebAttachment = async (passwordId, file, attachmentName) => {
+        const password = await api.getPassword(passwordId)
+        const vault = await api.getVault(password.vaultId)
+        const fr = new FileReader()
+        fr.readAsArrayBuffer(file)
+        fr.onload = () => {
+            const data = passworkLib.encryptPasswordAttachment(fr.result, vault)
+            data.name = file.name || attachmentName
+            return request.post(`/passwords/${passwordId}/attachment`, data)
+        }
+    }
+
     api.deletePasswordAttachment = (passwordId, attachmentId) =>
         request.delete(`/passwords/${passwordId}/attachment/${attachmentId}`);
 

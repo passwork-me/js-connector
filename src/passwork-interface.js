@@ -262,6 +262,17 @@ PassworkAPI.prototype.addPasswordAttachment = (passwordId, attachmentPath, attac
     throw new Error('not implemented');
 
 /**
+ * Attach file to password by Web
+ * @see POST: /passwords/{id}/attachment
+ * @param {string}passwordId
+ * @param {File}file
+ * @param {string|null}attachmentName
+ * @return {Promise}
+ */
+PassworkAPI.prototype.addPasswordWebAttachment = (passwordId, file, attachmentName) =>
+    throw new Error('not implemented');
+
+/**
  * Delete password attachment
  * @see DELETE: /passwords/{id}/attachment/{attachmentId}
  * @param {string}passwordId
