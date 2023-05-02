@@ -18,7 +18,7 @@ module.exports = function (options, request, api, {fileManager}) {
     }
 
     const validateCustoms = (customs) => {
-        if (customs.some(f => f.type === 'totp' && !cryptoInterface.isBase32(f.value))) {
+        if (customs.some(f => f.type === 'totp' && !cryptoInterface.isValidTotp(f.value))) {
             throw {code: 'invalidTotpFormat'};
         }
     };
@@ -165,7 +165,7 @@ module.exports = function (options, request, api, {fileManager}) {
 
         let oneTimePassword = null;
         if (options.useMasterPassword && (v5 || !secret)) {
-            oneTimePassword = cryptoInterface.generateString(32);
+            oneTimePassword = cryptoInterface.generateOneTimePassword();
         }
 
         if (!v5) {
@@ -268,7 +268,11 @@ module.exports = function (options, request, api, {fileManager}) {
                         groupPassword = cryptoInterface.rsaDecrypt(groupPasswordCrypted, decryptedKey);
                     }
                     if (groupPassword) {
-                        requestData.passwordCrypted = passworkLib.encryptString(groupPassword, options.masterPassword);
+                        if (options.useMasterPassword) {
+                            requestData.passwordCrypted = cryptoInterface.encode(groupPassword, options.masterPassword);
+                        } else {
+                            requestData.passwordCrypted = cryptoInterface.base64encode(groupPassword);
+                        }
                         requestData.silent = false;
                     }
                 }
@@ -277,7 +281,8 @@ module.exports = function (options, request, api, {fileManager}) {
             inboxPassword = await fetchPassword();
             if (!inboxPassword.viewed) {
                 const user = await api.userInfo();
-                inboxPassword = await fetchPassword(true, inboxPassword.groupPasswordCrypted, user.keys.privateCrypted);
+                const privateKey = options.useMasterPassword ? user.keys.privateCrypted : null;
+                inboxPassword = await fetchPassword(true, inboxPassword.groupPasswordCrypted, privateKey);
             }
             const vault = await api.getVault(inboxPassword.vaultId);
 

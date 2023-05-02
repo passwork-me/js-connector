@@ -45,8 +45,8 @@ module.exports = function (options, request, api) {
     api.addVault = (name, isPrivate = false) => request.get('/vaults/domain').then(domain => {
         let data;
         if (options.useMasterPassword) {
-            let groupPwd = cryptoInterface.generateString(32);
-            let salt = cryptoInterface.generateString(32);
+            let groupPwd = cryptoInterface.generateVaultMasterPassword();
+            let salt = cryptoInterface.generateVaultSalt();
             data = {name, salt};
             if (isPrivate) {
                 data.passwordCrypted = cryptoInterface.encode(groupPwd, options.masterPassword)
@@ -58,8 +58,8 @@ module.exports = function (options, request, api) {
             data = {
                 name,
                 salt:            'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-                passwordCrypted: 'YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE',
-                mpCrypted:       'YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE',
+                passwordCrypted: 'YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=',
+                mpCrypted:       'YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=',
                 passwordHash:    'ffe054fe7ae0cb6dc65c3af9b61d5209f439851db43d0ba5997337df154668eb',
             }
         }
