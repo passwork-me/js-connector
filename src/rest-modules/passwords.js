@@ -8,7 +8,7 @@ module.exports = function (options, request, api, {fileManager}) {
         password.getPassword = () => passworkLib.decryptString(password.cryptedPassword, encryptionKey);
     }
 
-    const enrichAttachment = (attachment, vault) => {
+    const enrichAttachment = (password, attachment, vault) => {
         const encryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault));
         attachment.getData = () => passworkLib.decryptPasswordAttachment(attachment, encryptionKey);
         attachment.saveTo = (path, name = null) => {
@@ -69,7 +69,7 @@ module.exports = function (options, request, api, {fileManager}) {
         let password = await api.getPassword(passwordId);
         let vault = await api.getVault(password.vaultId);
         let attachment = await request.get(`/passwords/${passwordId}/attachment/${attachmentId}`);
-        enrichAttachment(attachment, vault)
+        enrichAttachment(password, attachment, vault)
         return attachment;
     }
 
@@ -305,7 +305,11 @@ module.exports = function (options, request, api, {fileManager}) {
         let data = {passwordId, vaultTo, folderTo};
         const sourceEncryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(sourceVault));
         const targetEncryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(targetVault));
+
         data.cryptedPassword = passworkLib.encryptString(password.getPassword(), targetEncryptionKey);
+        if (passworkLib.useKeyEncryption(targetVault)) {
+            data.cryptedKey = passworkLib.encryptString(targetEncryptionKey, passworkLib.getVaultPassword(targetVault));
+        }
         if (password.hasOwnProperty('custom') && password.custom !== null) {
             let decryptCustoms = passworkLib.decryptCustoms(password.custom, sourceEncryptionKey);
             data.custom = passworkLib.encryptCustoms(decryptCustoms, targetEncryptionKey);

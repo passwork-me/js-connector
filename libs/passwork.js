@@ -3,12 +3,13 @@ module.exports = options => {
 
     let self = {
         useKeyEncryption: (vault) => {
-            return vault.vaultPasswordCrypted;
+            return !!vault.vaultPasswordCrypted;
         },
         getVaultPassword: (vault) => {
             if (!options.useMasterPassword) {
                 return '';
             }
+            // vault.passwordCrypted — backward capability parameter
             const pass = vault.passwordCrypted || vault.vaultPasswordCrypted;
             if (vault.scope === 'domain') {
                 let domainMaster = cryptoInterface.decode(vault.domainMaster, options.masterPassword);

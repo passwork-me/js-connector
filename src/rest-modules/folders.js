@@ -42,16 +42,19 @@ module.exports = function (options, request, api) {
         let action = copy ? 'copy' : 'move';
         let sourceVault = await api.getVault((await api.getFolder(folderId)).vaultId);
         let targetVault = sourceVault.id === vaultTo ? sourceVault : await api.getVault(vaultTo);
-        const sourceEncryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(sourceVault));
-        const targetEncryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(targetVault));
         let passwords = await getNestedPasswords(folderId);
         let data = {
             folderId, vaultTo, folderTo,
-            cryptedPasswords: {}, custom: {}, attachments: {},
+            cryptedPasswords: {}, cryptedKeys: {}, custom: {}, attachments: {},
         };
         for (const {id} of passwords) {
             let password = await api.getPassword(id);
+            const sourceEncryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(sourceVault));
+            const targetEncryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(targetVault));
             data.cryptedPasswords[id] = passworkLib.encryptString(password.getPassword(), targetEncryptionKey)
+            if (passworkLib.useKeyEncryption(targetVault)) {
+                data.cryptedKeys[id] = passworkLib.encryptString(targetEncryptionKey, passworkLib.getVaultPassword(targetVault));
+            }
             if (password.hasOwnProperty('custom') && password.custom !== null) {
                 let decryptCustoms = passworkLib.decryptCustoms(password.custom, sourceEncryptionKey);
                 data.custom[id] = passworkLib.encryptCustoms(decryptCustoms, targetEncryptionKey);
