@@ -19,6 +19,9 @@ module.exports = options => {
             }
         },
         getEncryptionKey: (passwordData, vaultPassword) => {
+            if (!options.useMasterPassword) {
+                return '';
+            }
             if (passwordData.cryptedKey) {
                 return cryptoInterface.decode(passwordData.cryptedKey, vaultPassword);
             } else {
@@ -81,7 +84,10 @@ module.exports = options => {
             };
         },
         decryptPasswordAttachment: (attachment, passwordEncryptionKey) => {
-            let key = cryptoInterface.decode(attachment.encryptedKey, passwordEncryptionKey);
+            let key = null;
+            if (options.useMasterPassword) {
+                key = cryptoInterface.decode(attachment.encryptedKey, passwordEncryptionKey);
+            }
             let byteCharacters = cryptoInterface.decodeFile(attachment.encryptedData, key);
             if (cryptoInterface.hash(byteCharacters) !== attachment.hash) {
                 throw "Can't decrypt attachment: hashes are not equal";
