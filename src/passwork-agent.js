@@ -8,6 +8,8 @@ module.exports = function (options) {
         'DELETE': (ep) => superagent.delete(ep)
     }
 
+    this.retryPromise = null
+
     this.request = (endpoint, method, body) => new Promise((resolve, reject) => {
         let requestUrl = method + ': ' + options.host + endpoint;
         if (options.debug) {
@@ -16,7 +18,7 @@ module.exports = function (options) {
 
         _method[method](options.host + endpoint)
             .send(body)
-            .set('Passwork-Auth', options.token)
+            .set('Passwork-Auth', endpoint.startsWith('/auth/refreshToken/') ? '' : options.token)
             .set('Passwork-MasterHash', cryptoInterfaceFactory(options).hash(options.masterPassword))
             .set('Passwork-Lang', options.lang)
             .then(res => resolve(res.body.data))
@@ -36,14 +38,18 @@ module.exports = function (options) {
 
     this.handleApiSessionExpired = (e) => {
         if (!!options.refreshToken && e.response && e.response.body && e.response.body.code === 'apiSessionExpired') {
-            const token = options.token;
-            options.token = '';
+            if (this.retryPromise) {
+                return this.retryPromise
+            }
 
-            return this.request(`/auth/refreshToken/${token}/${options.refreshToken}`, 'POST').then(response => {
+            return this.retryPromise = this.request(`/auth/refreshToken/${options.token}/${options.refreshToken}`, 'POST').then(response => {
                 options.token = response.token;
                 options.refreshToken = response.refreshToken;
-
+                this.retryPromise = null;
                 return Promise.resolve('retry');
+            }).catch(e => {
+                this.retryPromise = null;
+                return Promise.reject(e);
             })
         }
 
