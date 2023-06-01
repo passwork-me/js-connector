@@ -1,4 +1,5 @@
-module.exports = options => {
+const totp = require("totp-generator");
+module.exports = (options, fileManager) => {
     const cryptoInterface = require("./crypt")(options);
 
     let self = {
@@ -23,7 +24,11 @@ module.exports = options => {
                 return '';
             }
             if (passwordData.cryptedKey) {
-                return cryptoInterface.decode(passwordData.cryptedKey, vaultPassword);
+                if (passwordData.shortcut) {
+                    return cryptoInterface.decode(passwordData.shortcut.cryptedKey, vaultPassword);
+                } else {
+                    return cryptoInterface.decode(passwordData.cryptedKey, vaultPassword);
+                }
             } else {
                 return vaultPassword;
             }
@@ -98,7 +103,7 @@ module.exports = options => {
             }
             return Uint8Array.from(byteNumbers);
         },
-        formatAttachments: (attachments, encryptionKey, fileManager) => {
+        formatAttachments: (attachments, encryptionKey) => {
             const result = [];
             for (let {path, name} of attachments) {
                 if (!path) {
@@ -112,6 +117,103 @@ module.exports = options => {
                 }
             }
             return result;
+        },
+        enrichPassword: (password, vault) => {
+            const encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+            password.getPassword = () => self.decryptString(password.cryptedPassword, encryptionKey);
+        },
+        enrichAttachment: (password, attachment, vault) => {
+            const encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+            attachment.getData = () => self.decryptPasswordAttachment(attachment, encryptionKey);
+            attachment.saveTo = (path, name = null) => {
+                let fileName = name ? name : attachment.name;
+                fileManager.saveToFile(path + fileName, attachment.getData());
+            }
+        },
+        validateCustoms: (customs) => {
+            if (customs.some(f => f.type === 'totp' && !cryptoInterface.isValidTotp(f.value))) {
+                throw {code: 'invalidTotpFormat'};
+            }
+        },
+        enrichCustoms: (password, vault) => {
+            const encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+            password.getCustoms = () => {
+                if (!password.custom) {
+                    return null;
+                }
+
+                let customs = self.decryptCustoms(password.custom, encryptionKey);
+                customs.map(c => {
+                    if (c.type === 'totp') {
+                        c.getTotpCode = () => {
+                            return totp(c.value);
+                        };
+                    }
+                });
+
+                return customs;
+            }
+        },
+        preparePasswordDataToEdit: (password, vault, fields) => {
+            const vaultPassword = self.getVaultPassword(vault);
+            const encryptionKey = self.getEncryptionKey(password, vaultPassword)
+
+            let data = {};
+            if (fields.hasOwnProperty('password')) {
+                data.cryptedPassword = self.encryptString(fields.password, encryptionKey);
+                data.passwordFieldChanged = true;
+                delete fields.password;
+            }
+            if (fields.hasOwnProperty('custom') && fields.custom.length > 0) {
+                self.validateCustoms(fields.custom);
+                fields.custom = self.encryptCustoms(fields.custom, encryptionKey);
+            }
+            if (fileManager.canUseFs && fields.hasOwnProperty('attachments')) {
+                fields.attachments = self.formatAttachments(fields.attachments, encryptionKey);
+            } else {
+                delete fields.attachments;
+            }
+            fields.snapshot = self.makeSnapshot(password, vault);
+
+            data = {...data, ...fields};
+
+            return data;
+        },
+
+        makeSnapshot: (password, vault) => {
+            const encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+            let sData = {...password};
+            self.enrichPassword(password, vault);
+            self.enrichCustoms(password, vault);
+
+            sData.password = password.getPassword();
+            sData.custom = password.getCustoms();
+            sData.groupId = sData.vaultId;
+            if (sData.attachments && options.useMasterPassword) {
+                sData.attachments = sData.attachments.map(function (att) {
+                    return {
+                        id:   att.id,
+                        name: att.name,
+                        key:  self.decryptString(att.encryptedKey, encryptionKey)
+                    };
+                });
+            }
+
+            const possibleFields = ['id', 'groupId', 'folderId', 'name', 'login', 'url', 'description', 'attachments',
+                'color', 'tags', 'password', 'custom', 'lastPasswordUpdate'];
+            for (const key in sData) {
+                if (possibleFields.indexOf(key) < 0) {
+                    delete sData[key];
+                }
+            }
+
+            return self.encryptString(JSON.stringify(sData), encryptionKey);
+        },
+        prepareAttachment: (password, vault, attachmentPath, attachmentName) => {
+            const passwordEncryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault))
+            let data = self.encryptPasswordAttachment(fileManager.readFile(attachmentPath), passwordEncryptionKey)
+            data.name = !attachmentName ? fileManager.getFileBasename(attachmentPath) : attachmentName
+            return data;
         },
     }
 

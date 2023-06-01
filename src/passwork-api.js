@@ -1,6 +1,7 @@
 const cryptoInterfaceFactory = require('../libs/crypt')
 const restModules = [
     require("./rest-modules/passwords"),
+    require("./rest-modules/shortcuts"),
     require("./rest-modules/users"),
     require("./rest-modules/vaults"),
     require("./rest-modules/folders"),

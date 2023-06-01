@@ -1,6 +1,5 @@
-module.exports = function (options, request, api) {
-    const cryptoInterface = require("../../libs/crypt")(options);
-    const passworkLib = require("../../libs/passwork")(options);
+module.exports = function (options, request, api, {fileManager}) {
+    const passworkLib = require("../../libs/passwork")(options, fileManager);
 
     api.getFolder = (folderId) =>
         request.get(`/folders/${folderId}`);

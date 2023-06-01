@@ -1,47 +1,7 @@
 module.exports = function (options, request, api, {fileManager}) {
     const cryptoInterface = require("../../libs/crypt")(options);
-    const passworkLib = require("../../libs/passwork")(options);
+    const passworkLib = require("../../libs/passwork")(options, fileManager);
     const totp = require("totp-generator");
-
-    const enrichPassword = (password, vault) => {
-        const encryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault));
-        password.getPassword = () => passworkLib.decryptString(password.cryptedPassword, encryptionKey);
-    }
-
-    const enrichAttachment = (password, attachment, vault) => {
-        const encryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault));
-        attachment.getData = () => passworkLib.decryptPasswordAttachment(attachment, encryptionKey);
-        attachment.saveTo = (path, name = null) => {
-            let fileName = name ? name : attachment.name;
-            fileManager.saveToFile(path + fileName, attachment.getData());
-        }
-    }
-
-    const validateCustoms = (customs) => {
-        if (customs.some(f => f.type === 'totp' && !cryptoInterface.isValidTotp(f.value))) {
-            throw {code: 'invalidTotpFormat'};
-        }
-    };
-
-    const enrichCustoms = (password, vault) => {
-        const encryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault));
-        password.getCustoms = () => {
-            if (!password.custom) {
-                return null;
-            }
-
-            let customs = passworkLib.decryptCustoms(password.custom, encryptionKey);
-            customs.map(c => {
-                if (c.type === 'totp') {
-                    c.getTotpCode = () => {
-                        return totp(c.value);
-                    };
-                }
-            });
-
-            return customs;
-        }
-    }
 
     api.getPasswords = (vaultId = null, folderId = null) => {
         const ep = !!folderId ? `/folders/${folderId}/passwords` : `/vaults/${vaultId}/passwords`;
@@ -51,8 +11,8 @@ module.exports = function (options, request, api, {fileManager}) {
     api.getPassword = async (passwordId) => {
         let password = await request.get(`/passwords/${passwordId}`);
         let vault = await api.getVault(password.vaultId);
-        enrichPassword(password, vault);
-        enrichCustoms(password, vault);
+        passworkLib.enrichPassword(password, vault);
+        passworkLib.enrichCustoms(password, vault);
         return password;
     }
 
@@ -60,16 +20,17 @@ module.exports = function (options, request, api, {fileManager}) {
 
     api.getFavoritePasswords = () => request.get("/passwords/favorite");
 
-    api.searchPasswords = (query, tags = [], colors = [], vaultId = null, includeShared = false) =>
-        request.post('/passwords/search', {query, tags, colors, vaultId, includeShared});
+    api.searchPasswords = (query, tags = [], colors = [], vaultId = null, includeShared = false, includeShortcuts = false) =>
+        request.post('/passwords/search', {query, tags, colors, vaultId, includeShared, includeShortcuts});
 
-    api.searchPasswordsByUrl = (url, includeShared) => request.post('/passwords/searchByUrl', {url, includeShared});
+    api.searchPasswordsByUrl = (url, includeShared = false, includeShortcuts = false) =>
+        request.post('/passwords/searchByUrl', {url, includeShared, includeShortcuts});
 
     api.getAttachment = async (passwordId, attachmentId) => {
         let password = await api.getPassword(passwordId);
         let vault = await api.getVault(password.vaultId);
         let attachment = await request.get(`/passwords/${passwordId}/attachment/${attachmentId}`);
-        enrichAttachment(password, attachment, vault)
+        passworkLib.enrichAttachment(password, attachment, vault);
         return attachment;
     }
 
@@ -86,7 +47,7 @@ module.exports = function (options, request, api, {fileManager}) {
         delete fields.password;
 
         if (fields.hasOwnProperty('custom') && fields.custom.length > 0) {
-            validateCustoms(fields.custom);
+            passworkLib.validateCustoms(fields.custom);
             fields.custom = passworkLib.encryptCustoms(fields.custom, encryptionKey);
         }
         if (fileManager.canUseFs && fields.hasOwnProperty('attachments') && fields.attachments.length > 0) {
@@ -101,27 +62,7 @@ module.exports = function (options, request, api, {fileManager}) {
     api.editPassword = async (passwordId, fields = {}) => {
         const password = await request.get(`/passwords/${passwordId}`);
         const vault = await api.getVault(password.vaultId);
-        const vaultPassword = passworkLib.getVaultPassword(vault);
-        const encryptionKey = passworkLib.getEncryptionKey(password, vaultPassword)
-
-        let data = {};
-        if (fields.hasOwnProperty('password')) {
-            data.cryptedPassword = passworkLib.encryptString(fields.password, encryptionKey);
-            data.passwordFieldChanged = true;
-            delete fields.password;
-        }
-        if (fields.hasOwnProperty('custom') && fields.custom.length > 0) {
-            validateCustoms(fields.custom);
-            fields.custom = passworkLib.encryptCustoms(fields.custom, encryptionKey);
-        }
-        if (fileManager.canUseFs && fields.hasOwnProperty('attachments')) {
-            fields.attachments = passworkLib.formatAttachments(fields.attachments, encryptionKey, fileManager);
-        } else {
-            delete fields.attachments;
-        }
-        fields.snapshot = makeSnapshot(password, vault);
-
-        data = {...data, ...fields};
+        const data = passworkLib.preparePasswordDataToEdit(password, vault, fields)
 
         return request.put(`/passwords/${passwordId}`, data);
     };
@@ -131,16 +72,14 @@ module.exports = function (options, request, api, {fileManager}) {
         let vault = await api.getVault(password.vaultId);
 
         return request.delete(`/passwords/${passwordId}`, {
-            snapshot: makeSnapshot(password, vault)
+            snapshot: passworkLib.makeSnapshot(password, vault)
         });
     };
 
     api.addPasswordAttachment = async (passwordId, attachmentPath, attachmentName = null) => {
         let password = await api.getPassword(passwordId);
         let vault = await api.getVault(password.vaultId);
-        const passwordEncryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault))
-        let data = passworkLib.encryptPasswordAttachment(fileManager.readFile(attachmentPath), passwordEncryptionKey)
-        data.name = !attachmentName ? fileManager.getFileBasename(attachmentPath) : attachmentName
+        let data = passworkLib.prepareAttachment(password, vault, attachmentPath, attachmentName);
 
         return request.post(`/passwords/${passwordId}/attachment`, data);
     }
@@ -286,8 +225,8 @@ module.exports = function (options, request, api, {fileManager}) {
             }
             const vault = await api.getVault(inboxPassword.vaultId);
 
-            enrichPassword(inboxPassword.password, vault);
-            enrichCustoms(inboxPassword.password, vault);
+            passworkLib.enrichPassword(inboxPassword.password, vault);
+            passworkLib.enrichCustoms(inboxPassword.password, vault);
         }
 
         return inboxPassword;
@@ -325,31 +264,5 @@ module.exports = function (options, request, api, {fileManager}) {
             }
         }
         return request.post(`/passwords/${passwordId}/${action}`, data);
-    }
-
-    function makeSnapshot(password, vault) {
-        const encryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault));
-        let sData = {...password};
-        enrichPassword(password, vault);
-        enrichCustoms(password, vault);
-
-        sData.password = password.getPassword();
-        sData.custom = password.getCustoms();
-        sData.groupId = sData.vaultId;
-        if (sData.attachments && options.useMasterPassword) {
-            sData.attachments = sData.attachments.map(function (att) {
-                return {id: att.id, name: att.name, key: passworkLib.decryptString(att.encryptedKey, encryptionKey)};
-            });
-        }
-
-        const possibleFields = ['id', 'groupId', 'folderId', 'name', 'login', 'url', 'description', 'attachments',
-            'color', 'tags', 'password', 'custom', 'lastPasswordUpdate'];
-        for (const key in sData) {
-            if (possibleFields.indexOf(key) < 0) {
-                delete sData[key];
-            }
-        }
-
-        return passworkLib.encryptString(JSON.stringify(sData), encryptionKey);
     }
 };
