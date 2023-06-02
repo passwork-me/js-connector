@@ -451,8 +451,8 @@ PassworkAPI.prototype.getShortcutPasswordSharingInfo = (shortcutId) => throw new
  * @param {string|null} secret
  * @return {Promise}
  */
-PassworkAPI.prototype.generateShortcutPasswordShareLink = (shortcutId, reusable = false, time = 24, secret = null)
-    => throw new Error('not implemented');
+PassworkAPI.prototype.generateShortcutPasswordShareLink = (shortcutId, reusable = false, time = 24, secret = null) =>
+    throw new Error('not implemented');
 
 /**
  * Attach file to shortcut password
