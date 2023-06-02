@@ -391,12 +391,68 @@ PassworkAPI.prototype.getShortcutPasswordAttachment = (shortcutId, attachmentId)
 PassworkAPI.prototype.editShortcutPassword = (shortcutId, fields = {}) => throw new Error('not implemented');
 
 /**
+ * Move shortcut
+ * @see POST: /sharing/shortcut/{shortcutId}/move
+ * @param {string} shortcutId
+ * @param {string} vaultIdTo
+ * @param {string|null} folderIdTo
+ * @return {Promise}
+ */
+PassworkAPI.prototype.moveShortcut = (shortcutId, vaultIdTo, folderIdTo = null) => throw new Error('not implemented');
+
+/**
+ * Copy shortcut
+ * @see POST: /sharing/shortcut/{shortcutId}/copy
+ * @param {string} shortcutId
+ * @param {string} vaultIdTo
+ * @param {string|null} folderIdTo
+ * @return {Promise}
+ */
+PassworkAPI.prototype.copyShortcut = (shortcutId, vaultIdTo, folderIdTo = null) => throw new Error('not implemented');
+
+/**
  * Delete shortcut
  * @see DELETE: /sharing/shortcut/{shortcutId}
  * @param {string} shortcutId
  * @return {Promise}
  */
 PassworkAPI.prototype.deleteShortcut = (shortcutId) => throw new Error('not implemented');
+
+/**
+ * Mark shortcut as favorite
+ * @see POST: /sharing/shortcut/{shortcutId}/favorite
+ * @param {string}shortcutId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.favoriteShortcut = (shortcutId) => throw new Error('not implemented');
+
+/**
+ * Unfavorite shortcut
+ * @see POST: /sharing/shortcut/{shortcutId}/unfavorite
+ * @param {string}shortcutId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.unfavoriteShortcut = (shortcutId) => throw new Error('not implemented');
+
+/**
+ * Get shortcut password sharing info
+ * @see GET: /sharing/shortcut/{shortcutId}/sharingInfo
+ * @param {string} shortcutId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getShortcutPasswordSharingInfo = (shortcutId) => throw new Error('not implemented');
+
+/**
+ * Generate share hyperlink
+ * @see POST: /sharing/shortcut/generate-share-link
+ * @param {string} shortcutId
+ * @param {boolean} reusable
+ * @param {number|string} time
+ * @param {string|null} secret
+ * @return {Promise}
+ */
+PassworkAPI.prototype.generateShortcutPasswordShareLink = (shortcutId, reusable = false, time = 24, secret = null)
+    => throw new Error('not implemented');
 
 /**
  * Attach file to shortcut password

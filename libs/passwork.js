@@ -215,6 +215,61 @@ module.exports = (options, fileManager) => {
             data.name = !attachmentName ? fileManager.getFileBasename(attachmentPath) : attachmentName
             return data;
         },
+        prepareShareLinkData: (password, vault, reusable = false, time = 24, secret = null) => {
+            const v5 =  Object.prototype.toString.call(time) === "[object String]";
+
+            let oneTimePassword = null;
+            if (options.useMasterPassword && (v5 || !secret)) {
+                oneTimePassword = cryptoInterface.generateOneTimePassword();
+            }
+
+            if (!v5) {
+                if (!options.useMasterPassword) {
+                    oneTimePassword = null;
+                } else {
+                    oneTimePassword = oneTimePassword? oneTimePassword : secret;
+                }
+            }
+
+            if (password.custom && password.custom.length) {
+                password.custom = password.getCustoms();
+            }
+
+            let oneTimePasswordHash = null;
+            let oneTimePasswordCrypted = null;
+            if (oneTimePassword) {
+                const encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+                // Encode password, customs, attachments with one time password
+                password.cryptedPassword = self.encryptString(password.getPassword(), oneTimePassword);
+                if (password.custom && password.custom.length) {
+                    password.custom = self.encryptCustoms(password.custom, oneTimePassword);
+                }
+                if (password.attachments && password.attachments.length) {
+                    password.attachments.map(attachment => {
+                        let key = self.decryptString(attachment.encryptedKey, encryptionKey);
+                        attachment.encryptedKey = self.encryptString(key, oneTimePassword);
+                    });
+                }
+                oneTimePasswordHash = cryptoInterface.hash(oneTimePassword);
+            } else {
+                password.password = password.getPassword();
+                delete password.cryptedPassword;
+            }
+
+            let data;
+            if (v5) {
+                let type = reusable ? 'reusable' : 'onetime';
+                const encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+                if (oneTimePassword) {
+                    oneTimePasswordCrypted = self.encryptString(oneTimePassword, encryptionKey);
+                }
+                data = {password, ttl: time, type, passwordHash: oneTimePasswordHash, oneTimePasswordCrypted};
+            } else {
+                data = {password, reusable, time: time, secretHash: oneTimePasswordHash};
+            }
+
+            return {data, oneTimePassword};
+        },
     }
 
     return self;

@@ -40,4 +40,41 @@ module.exports = function (options, request, api, {fileManager}) {
         return request.delete(`/sharing/shortcut/${shortcutId}`);
     };
 
+    api.moveShortcut = async (shortcutId, vaultId, folderId = null) => moveCopy('move', shortcutId, vaultId, folderId);
+
+    api.copyShortcut = async (shortcutId, vaultId, folderId = null) => moveCopy('copy', shortcutId, vaultId, folderId);
+
+    async function moveCopy(action, shortcutId, vaultTo, folderTo) {
+        let shortcutPassword = await api.getShortcutPassword(shortcutId);
+        let sc = shortcutPassword.shortcut;
+        let sourceVault = await api.getVault(sc.vaultId);
+        let targetVault = sc.vaultId === vaultTo ? sourceVault : await api.getVault(vaultTo);
+
+        const encryptionKey = passworkLib.getEncryptionKey(shortcutPassword, passworkLib.getVaultPassword(sourceVault));
+        const cryptedKey = passworkLib.encryptString(encryptionKey, passworkLib.getVaultPassword(targetVault));
+        const data = {vaultTo, folderTo, cryptedKey};
+
+        return request.post(`/sharing/shortcut/${shortcutId}/${action}`, data);
+    }
+
+    api.favoriteShortcut = async (shortcutId) => request.post(`/sharing/shortcut/${shortcutId}/favorite`);
+
+    api.unfavoriteShortcut = async (shortcutId) => request.post(`/sharing/shortcut/${shortcutId}/unfavorite`);
+
+    api.getShortcutPasswordSharingInfo = async (shortcutId) => request.get(`/sharing/shortcut/${shortcutId}/sharingInfo`);
+
+    api.generateShortcutPasswordShareLink = async (shortcutId, reusable = false, time = 24, secret = null) => {
+        let shortcutPassword = await api.getShortcutPassword(shortcutId);
+        const vault = await api.getVault(shortcutPassword.shortcut.vaultId);
+        const {data, oneTimePassword} = passworkLib.prepareShareLinkData(shortcutPassword, vault, reusable, time, secret);
+        data.fromShortcut = true;
+        data.shortcut = {id: shortcutId};
+
+        return request.post(`/passwords/generate-share-link`, data).then(res => {
+            if (oneTimePassword) {
+                return res + '#code=' + oneTimePassword;
+            }
+            return res;
+        });
+    };
 };
