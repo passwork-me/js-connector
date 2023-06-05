@@ -55,6 +55,9 @@ module.exports = function (options, request, api, {fileManager}) {
         } else {
             delete fields.attachments;
         }
+        if (!fields.name) {
+            fields.name = '';
+        }
 
         return request.post('/passwords', fields);
     };

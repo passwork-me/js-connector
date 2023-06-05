@@ -12,7 +12,7 @@ module.exports = function (options, request, api, {fileManager}) {
 
     api.addFolder = (vaultId, folderName, parentFolderId = null) => {
         return request.post('/folders', {
-            name:     folderName,
+            name:     folderName || '',
             vaultId,
             parentId: parentFolderId,
         });
