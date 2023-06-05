@@ -1,4 +1,4 @@
-module.exports = function (options) {
+module.exports = function (options, api) {
     const superagent = require("superagent");
     const cryptoInterfaceFactory = require("../libs/crypt");
     const _method = {
@@ -43,8 +43,7 @@ module.exports = function (options) {
             }
 
             return this.retryPromise = this.request(`/auth/refreshToken/${options.token}/${options.refreshToken}`, 'POST').then(response => {
-                options.token = response.token;
-                options.refreshToken = response.refreshToken;
+                api.setTokens(response.token, response.refreshToken);
                 this.retryPromise = null;
                 return Promise.resolve('retry');
             }).catch(e => {
