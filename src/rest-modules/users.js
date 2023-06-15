@@ -12,8 +12,7 @@ module.exports = function (options, request, api) {
             versionInfo = info;
             return request.post(`/auth/login/${apiKey}`, {useMasterPassword: options.useMasterPassword});
         }).then(data => {
-            options.token = data.token;
-            options.refreshToken = data.refreshToken ? data.refreshToken : '';
+            api.setTokens(data.token, data.refreshToken);
             data.versionInfo = versionInfo;
             return data;
         })

@@ -33,6 +33,30 @@ PassworkAPI.prototype.loginWithKey = (apiKey, masterKey = null) => throw new Err
 PassworkAPI.prototype.setAuthOptions = (apiToken, masterPassword = false, masterKey = null) => {};
 
 /**
+ * Set token and refreshToken. Event "tokensChanged" will be dispatched
+ *
+ * @param {string} token
+ * @param {string|null} refreshToken
+ */
+PassworkAPI.prototype.setTokens = (token, refreshToken) => throw new Error('not implemented');
+
+/**
+ * Dispatch an event
+ *
+ * @param {string} event
+ * @param {Object} data
+ */
+PassworkAPI.prototype.dispatchEvent = (event, data) => throw new Error('not implemented');
+
+/**
+ * Listen an event
+ *
+ * @param {string} event
+ * @param {Function} callable
+ */
+PassworkAPI.prototype.listenEvent = (event, callable) => throw new Error('not implemented');
+
+/**
  * Set request options
  * @param {{
  *   lang: string,
