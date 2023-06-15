@@ -30,6 +30,9 @@ module.exports = function (options, services = null) {
         lang:              null,
         hash:              'sha256',
     };
+
+    const _eventListeners = {}
+
     for (const key in options) {
         _options[key] = options[key];
     }
@@ -40,8 +43,7 @@ module.exports = function (options, services = null) {
                 apiToken = {token: apiToken};
             }
 
-            _options.token = apiToken.token;
-            _options.refreshToken = apiToken.refreshToken ? apiToken.refreshToken : '';
+            this.setTokens(apiToken.token, apiToken.refreshToken);
 
             if (masterKey) {
                 _options.masterPassword = masterKey;
@@ -80,7 +82,7 @@ module.exports = function (options, services = null) {
         }
     };
 
-    const request = new services.agent(_options).request;
+    const request = new services.agent(_options, this).request;
     restModules.forEach(m => new m(_options, request, this, services));
 
     this.loadMasterKey = (options) => {
@@ -117,4 +119,32 @@ module.exports = function (options, services = null) {
         })
     }
 
+    this.setTokens = (token, refreshToken) => {
+        _options.token = token;
+        _options.refreshToken = refreshToken ? refreshToken : '';
+
+        this.dispatchEvent('tokensChanged', {token: _options.token, refreshToken: _options.refreshToken})
+    }
+
+    this.dispatchEvent = (eventName, data) => {
+        if (!_eventListeners.hasOwnProperty(eventName)) {
+            return;
+        }
+
+        for (let eventListener of _eventListeners[eventName]) {
+            eventListener(data);
+        }
+    }
+
+    this.listenEvent = (eventName, callable) => {
+        if (!_eventListeners.hasOwnProperty(eventName)) {
+            _eventListeners[eventName] = [];
+        }
+
+        if (typeof callable !== 'function') {
+            throw Error('Function must be provided');
+        }
+
+        _eventListeners[eventName].push(callable)
+    }
 };
