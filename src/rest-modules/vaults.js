@@ -18,17 +18,21 @@ module.exports = function (options, request, api) {
     api.getVaultFullInfo = (vaultId) =>
         request.get(`/vaults/${vaultId}/fullInfo`).then(res => {
             if (res.hasOwnProperty('folders')) {
-                res.folders = res.folders.sort((a, b) => a.name.localeCompare(b.name))
+                res.folders = res.folders.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
             }
             if (res.hasOwnProperty('passwords')) {
-                res.passwords = res.passwords.sort((a, b) => a.name.localeCompare(b.name))
+                res.passwords = res.passwords.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
             }
 
             return res;
         });
 
-    api.getVaultSharingInfo = (vaultId) =>
-        request.get(`/vaults/${vaultId}/sharingInfo`);
+    api.getDirectorySharingInfo = (vaultId, folderId = '') => {
+        if (folderId && folderId.length) {
+            return request.get(`/vaults/${vaultId}/sharingInfo/${folderId}`);
+        }
+        return request.get(`/vaults/${vaultId}/sharingInfo`);
+    };
 
     api.getTags = () =>
         request.get(`/vaults/tags`);

@@ -175,9 +175,10 @@ PassworkAPI.prototype.getAttachment = (passwordId, attachmentId) => throw new Er
  * @param {string[]} colors
  * @param {string|null} vaultId
  * @param {boolean} includeShared
+ * @param {boolean} includeShortcuts
  * @return {Promise}
  */
-PassworkAPI.prototype.searchPasswords = (query, tags = [], colors = [], vaultId = null, includeShared = false) =>
+PassworkAPI.prototype.searchPasswords = (query, tags = [], colors = [], vaultId = null, includeShared = false, includeShortcuts = false) =>
     throw new Error('not implemented');
 
 /**
@@ -185,15 +186,17 @@ PassworkAPI.prototype.searchPasswords = (query, tags = [], colors = [], vaultId 
  * @see POST: /passwords/searchByUrl
  * @param {string} url
  * @param {boolean} includeShared
+ * @param {boolean} includeShortcuts
  * @return {Promise}
  */
-PassworkAPI.prototype.searchPasswordsByUrl = (url, includeShared = false) => throw new Error('not implemented');
+PassworkAPI.prototype.searchPasswordsByUrl = (url, includeShared = false, includeShortcuts = false) =>
+    throw new Error('not implemented');
 
 /**
  * Add password
  * @see POST: /passwords
  * @param {{
- *   vaultId:  string
+ *   vaultId:  string,
  *   name:     string,
  *   login:    string,
  *   password: string,
@@ -378,6 +381,135 @@ PassworkAPI.prototype.inboxNotificationsCount = () => throw new Error('not imple
 PassworkAPI.prototype.inboxNotificationsMarkAsViewed = () => throw new Error('not implemented');
 
 /**
+ * Get shortcut password
+ * @see GET: /sharing/shortcut/{shortcutId}
+ * @param {string} shortcutId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getShortcutPassword = (shortcutId) => throw new Error('not implemented');
+
+/**
+ * Get shortcut password attachment
+ * @see GET: /sharing/shortcut/{shortcutId}/attachment/{attachmentId}
+ * @param {string} shortcutId
+ * @param {string} attachmentId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getShortcutPasswordAttachment = (shortcutId, attachmentId) => throw new Error('not implemented');
+
+/**
+ * Edit shortcut password
+ * @see PUT: /sharing/shortcut/{id}
+ * @param {string} shortcutId
+ * @param {{
+ *   name: string|null,
+ *   login: string|null,
+ *   password: string|null,
+ *   color: string|null,
+ *   tags: string[],
+ *   custom: [
+ *      {
+ *          name:  string,
+ *          value: string,
+ *          type:  string
+ *      }
+ *   ],
+ *   attachments: [
+ *       {
+ *           path: string,
+ *           name: string|null
+ *       }
+ *   ]
+ * }} fields
+ * @return {Promise}
+ */
+PassworkAPI.prototype.editShortcutPassword = (shortcutId, fields = {}) => throw new Error('not implemented');
+
+/**
+ * Move shortcut
+ * @see POST: /sharing/shortcut/{shortcutId}/move
+ * @param {string} shortcutId
+ * @param {string} vaultIdTo
+ * @param {string|null} folderIdTo
+ * @return {Promise}
+ */
+PassworkAPI.prototype.moveShortcut = (shortcutId, vaultIdTo, folderIdTo = null) => throw new Error('not implemented');
+
+/**
+ * Copy shortcut
+ * @see POST: /sharing/shortcut/{shortcutId}/copy
+ * @param {string} shortcutId
+ * @param {string} vaultIdTo
+ * @param {string|null} folderIdTo
+ * @return {Promise}
+ */
+PassworkAPI.prototype.copyShortcut = (shortcutId, vaultIdTo, folderIdTo = null) => throw new Error('not implemented');
+
+/**
+ * Delete shortcut
+ * @see DELETE: /sharing/shortcut/{shortcutId}
+ * @param {string} shortcutId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.deleteShortcut = (shortcutId) => throw new Error('not implemented');
+
+/**
+ * Mark shortcut as favorite
+ * @see POST: /sharing/shortcut/{shortcutId}/favorite
+ * @param {string}shortcutId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.favoriteShortcut = (shortcutId) => throw new Error('not implemented');
+
+/**
+ * Unfavorite shortcut
+ * @see POST: /sharing/shortcut/{shortcutId}/unfavorite
+ * @param {string}shortcutId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.unfavoriteShortcut = (shortcutId) => throw new Error('not implemented');
+
+/**
+ * Get shortcut password sharing info
+ * @see GET: /sharing/shortcut/{shortcutId}/sharingInfo
+ * @param {string} shortcutId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getShortcutPasswordSharingInfo = (shortcutId) => throw new Error('not implemented');
+
+/**
+ * Generate share hyperlink
+ * @see POST: /sharing/shortcut/generate-share-link
+ * @param {string} shortcutId
+ * @param {boolean} reusable
+ * @param {number|string} time
+ * @param {string|null} secret
+ * @return {Promise}
+ */
+PassworkAPI.prototype.generateShortcutPasswordShareLink = (shortcutId, reusable = false, time = 24, secret = null) =>
+    throw new Error('not implemented');
+
+/**
+ * Attach file to shortcut password
+ * @see POST: /sharing/shortcut/{shortcutId}/attachment
+ * @param {string}shortcutId
+ * @param {string}attachmentPath
+ * @param {string|null}attachmentName
+ * @return {Promise}
+ */
+PassworkAPI.prototype.addShortcutPasswordAttachment = (shortcutId, attachmentPath, attachmentName = null) =>
+    throw new Error('not implemented');
+
+/**
+ * Delete shortcut password attachment
+ * @see DELETE: /sharing/shortcut/{id}/attachment/{attachmentId}
+ * @param {string}shortcutId
+ * @param {string}attachmentId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.deleteShortcutPasswordAttachment = (shortcutId, attachmentId) => throw new Error('not implemented');
+
+/**
  * Get vaults count
  * @see GET: /vaults/count
  * @return {Promise}
@@ -408,12 +540,13 @@ PassworkAPI.prototype.getVault = (vaultId) => throw new Error('not implemented')
 PassworkAPI.prototype.getVaultFullInfo = (vaultId) => throw new Error('not implemented');
 
 /**
- * Get vault sharing info for vault admin
- * @see GET: /vaults/{id}/sharingInfo
- * @param {string} vaultId — ID
+ * Get directory sharing info for vault admin
+ * @see GET: /vaults/{vaultId}/sharingInfo/{?folderId}
+ * @param {string} vaultId
+ * @param {string} folderId
  * @return {Promise}
  */
-PassworkAPI.prototype.getVaultSharingInfo = (vaultId) => throw new Error('not implemented');
+PassworkAPI.prototype.getDirectorySharingInfo = (vaultId, folderId) => throw new Error('not implemented');
 
 /**
  * Get vault folders
