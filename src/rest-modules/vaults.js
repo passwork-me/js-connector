@@ -27,8 +27,12 @@ module.exports = function (options, request, api) {
             return res;
         });
 
-    api.getVaultSharingInfo = (vaultId) =>
-        request.get(`/vaults/${vaultId}/sharingInfo`);
+    api.getDirectorySharingInfo = (vaultId, folderId = '') => {
+        if (folderId && folderId.length) {
+            return request.get(`/vaults/${vaultId}/sharingInfo/${folderId}`);
+        }
+        return request.get(`/vaults/${vaultId}/sharingInfo`);
+    };
 
     api.getTags = () =>
         request.get(`/vaults/tags`);

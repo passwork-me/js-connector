@@ -540,12 +540,13 @@ PassworkAPI.prototype.getVault = (vaultId) => throw new Error('not implemented')
 PassworkAPI.prototype.getVaultFullInfo = (vaultId) => throw new Error('not implemented');
 
 /**
- * Get vault sharing info for vault admin
- * @see GET: /vaults/{id}/sharingInfo
- * @param {string} vaultId — ID
+ * Get directory sharing info for vault admin
+ * @see GET: /vaults/{vaultId}/sharingInfo/{?folderId}
+ * @param {string} vaultId
+ * @param {string} folderId
  * @return {Promise}
  */
-PassworkAPI.prototype.getVaultSharingInfo = (vaultId) => throw new Error('not implemented');
+PassworkAPI.prototype.getDirectorySharingInfo = (vaultId, folderId) => throw new Error('not implemented');
 
 /**
  * Get vault folders
