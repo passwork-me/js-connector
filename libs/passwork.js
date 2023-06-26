@@ -69,8 +69,8 @@ module.exports = (options, fileManager) => {
         },
         encryptPasswordAttachment: (buffer, passwordEncryptionKey) => {
             let arrayBuffer = new Int8Array(buffer);
-            if (arrayBuffer.byteLength > 1024 * 100) {
-                throw "Attached file max size is 100KB";
+            if (arrayBuffer.byteLength > 1024 * 1024 * 5) {
+                throw "Attached file max size is 5MB";
             }
             let key, encryptedKey, encryptedData;
             if (options.useMasterPassword) {

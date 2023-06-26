@@ -38,7 +38,7 @@ module.exports = function (options, request, api, {fileManager}) {
         const vault = await api.getVault(fields.vaultId);
         const vaultPassword = passworkLib.getVaultPassword(vault);
         const encryptionKey = passworkLib.useKeyEncryption(vault) ?
-            cryptoInterface.generateString(32) : vaultPassword;
+            cryptoInterface.generatePassword(32) : vaultPassword;
 
         fields.cryptedPassword = passworkLib.encryptString(fields.password, encryptionKey);
         if (passworkLib.useKeyEncryption(vault)) {
