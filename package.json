@@ -1,6 +1,6 @@
 {
   "name": "passwork-js",
-  "version": "1.2.13",
+  "version": "1.2.14",
   "dependencies": {
     "abab": "^2.0.6",
     "crypto-js": "^4.0.0",
