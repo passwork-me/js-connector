@@ -59,11 +59,17 @@ module.exports = (options, fileManager) => {
         decryptCustoms: (customFields, encryptionKey) => {
             let result = [];
             for (const custom of customFields) {
-                result.push({
-                    name:  self.decryptString(custom.name, encryptionKey),
-                    value: self.decryptString(custom.value, encryptionKey),
-                    type:  self.decryptString(custom.type, encryptionKey),
-                });
+                if (typeof custom === 'object' &&
+                    custom !== null &&
+                    custom.hasOwnProperty('name') &&
+                    custom.hasOwnProperty('value') &&
+                    custom.hasOwnProperty('type')) {
+                    result.push({
+                        name:  self.decryptString(custom.name, encryptionKey),
+                        value: self.decryptString(custom.value, encryptionKey),
+                        type:  self.decryptString(custom.type, encryptionKey),
+                    });
+                }
             }
             return result;
         },
