@@ -73,10 +73,9 @@ module.exports = function (options, request, api, {fileManager}) {
     api.deletePassword = async (passwordId) => {
         let password = await request.get(`/passwords/${passwordId}`);
         let vault = await api.getVault(password.vaultId);
+        const encryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault));
 
-        return request.delete(`/passwords/${passwordId}`, {
-            snapshot: passworkLib.makeSnapshot(password, vault)
-        });
+        return request.delete(`/passwords/${passwordId}`, {snapshot: passworkLib.makeSnapshot(password, encryptionKey)});
     };
 
     api.addPasswordAttachment = async (passwordId, attachmentPath, attachmentName = null) => {

@@ -193,18 +193,17 @@ module.exports = (options, fileManager) => {
             } else {
                 delete fields.attachments;
             }
-            fields.snapshot = self.makeSnapshot(password, vault);
+            fields.snapshot = self.makeSnapshot(password, encryptionKey);
 
             data = {...data, ...fields};
 
             return data;
         },
 
-        makeSnapshot: (password, vault) => {
-            const encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+        makeSnapshot: (password, encryptionKey) => {
             let sData = {...password};
-            self.enrichPassword(password, vault);
-            self.enrichCustoms(password, vault);
+            self.enrichPassword(password, null, encryptionKey);
+            self.enrichCustoms(password, null, encryptionKey);
 
             sData.password = password.getPassword();
             sData.custom = password.getCustoms();
