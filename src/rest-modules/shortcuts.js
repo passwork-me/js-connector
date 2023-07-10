@@ -20,7 +20,8 @@ module.exports = function (options, request, api, {fileManager}) {
     api.addShortcutPasswordAttachment = async (shortcutId, attachmentPath, attachmentName = null) => {
         let shortcutPassword = await api.getShortcutPassword(shortcutId);
         let vault = await api.getVault(shortcutPassword.shortcut.vaultId);
-        let data = passworkLib.prepareAttachment(shortcutPassword, vault, attachmentPath, attachmentName);
+        const passwordEncryptionKey = passworkLib.getEncryptionKey(shortcutPassword, passworkLib.getVaultPassword(vault))
+        let data = passworkLib.prepareAttachment(passwordEncryptionKey, attachmentPath, attachmentName);
 
         return request.post(`/sharing/shortcut/${shortcutId}/attachment`, data);
     }
@@ -31,7 +32,8 @@ module.exports = function (options, request, api, {fileManager}) {
     api.editShortcutPassword = async (shortcutId, fields = {}) => {
         const shortcutPassword = await api.getShortcutPassword(shortcutId);
         const vault = await api.getVault(shortcutPassword.shortcut.vaultId);
-        const data = passworkLib.preparePasswordDataToEdit(shortcutPassword, vault, fields)
+        const encryptionKey = passworkLib.getEncryptionKey(shortcutPassword, passworkLib.getVaultPassword(vault));
+        const data = passworkLib.preparePasswordDataToEdit(shortcutPassword, encryptionKey, fields)
 
         return request.put(`/sharing/shortcut/${shortcutId}`, data);
     };
