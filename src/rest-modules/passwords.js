@@ -65,7 +65,7 @@ module.exports = function (options, request, api, {fileManager}) {
         const password = await request.get(`/passwords/${passwordId}`);
         const vault = await api.getVault(password.vaultId);
         const encryptionKey = passworkLib.getEncryptionKey(password, passworkLib.getVaultPassword(vault));
-        const data = passworkLib.preparePasswordDataToEdit(encryptionKey, vault, fields)
+        const data = passworkLib.preparePasswordDataToEdit(password, encryptionKey, fields);
 
         return request.put(`/passwords/${passwordId}`, data);
     };
