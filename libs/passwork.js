@@ -33,6 +33,17 @@ module.exports = (options, fileManager) => {
                 return vaultPassword;
             }
         },
+        getInboxEncryptionKey: (inbox, user) => {
+            if (options.useMasterPassword) {
+                if (!user.keys) {
+                    throw `Can't fetch user private keys`;
+                }
+                const privateKey = self.decryptString(user.keys.privateCrypted, options.masterPassword);
+                return cryptoInterface.rsaDecrypt(inbox.cryptedKey, privateKey);
+            } else {
+                return cryptoInterface.base64decode(inbox.cryptedKey);
+            }
+        },
         encryptString:   (string, encryptionKey) => {
             if (options.useMasterPassword) {
                 return cryptoInterface.encode(string, encryptionKey);
@@ -124,12 +135,16 @@ module.exports = (options, fileManager) => {
             }
             return result;
         },
-        enrichPassword: (password, vault) => {
-            const encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+        enrichPassword: (password, vault, encryptionKey = null) => {
+            if (!encryptionKey) {
+                encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+            }
             password.getPassword = () => self.decryptString(password.cryptedPassword, encryptionKey);
         },
-        enrichAttachment: (password, attachment, vault) => {
-            const encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+        enrichAttachment: (password, attachment, vault, encryptionKey = null) => {
+            if (!encryptionKey) {
+                encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+            }
             attachment.getData = () => self.decryptPasswordAttachment(attachment, encryptionKey);
             attachment.saveTo = (path, name = null) => {
                 let fileName = name ? name : attachment.name;
@@ -141,8 +156,10 @@ module.exports = (options, fileManager) => {
                 throw {code: 'invalidTotpFormat'};
             }
         },
-        enrichCustoms: (password, vault) => {
-            const encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+        enrichCustoms: (password, vault, encryptionKey = null) => {
+            if (!encryptionKey) {
+                encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+            }
             password.getCustoms = () => {
                 if (!password.custom) {
                     return null;
@@ -160,10 +177,7 @@ module.exports = (options, fileManager) => {
                 return customs;
             }
         },
-        preparePasswordDataToEdit: (password, vault, fields) => {
-            const vaultPassword = self.getVaultPassword(vault);
-            const encryptionKey = self.getEncryptionKey(password, vaultPassword)
-
+        preparePasswordDataToEdit: (password, encryptionKey, fields) => {
             let data = {};
             if (fields.hasOwnProperty('password')) {
                 data.cryptedPassword = self.encryptString(fields.password, encryptionKey);
@@ -179,18 +193,17 @@ module.exports = (options, fileManager) => {
             } else {
                 delete fields.attachments;
             }
-            fields.snapshot = self.makeSnapshot(password, vault);
+            fields.snapshot = self.makeSnapshot(password, encryptionKey);
 
             data = {...data, ...fields};
 
             return data;
         },
 
-        makeSnapshot: (password, vault) => {
-            const encryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault));
+        makeSnapshot: (password, encryptionKey) => {
             let sData = {...password};
-            self.enrichPassword(password, vault);
-            self.enrichCustoms(password, vault);
+            self.enrichPassword(password, null, encryptionKey);
+            self.enrichCustoms(password, null, encryptionKey);
 
             sData.password = password.getPassword();
             sData.custom = password.getCustoms();
@@ -215,8 +228,7 @@ module.exports = (options, fileManager) => {
 
             return self.encryptString(JSON.stringify(sData), encryptionKey);
         },
-        prepareAttachment: (password, vault, attachmentPath, attachmentName) => {
-            const passwordEncryptionKey = self.getEncryptionKey(password, self.getVaultPassword(vault))
+        prepareAttachment: (passwordEncryptionKey, attachmentPath, attachmentName) => {
             let data = self.encryptPasswordAttachment(fileManager.readFile(attachmentPath), passwordEncryptionKey)
             data.name = !attachmentName ? fileManager.getFileBasename(attachmentPath) : attachmentName
             return data;

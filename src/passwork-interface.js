@@ -359,6 +359,63 @@ PassworkAPI.prototype.getInboxPasswords = () => throw new Error('not implemented
 PassworkAPI.prototype.getInboxPassword = (inboxId) => throw new Error('not implemented');
 
 /**
+ * Edit inbox password
+ * @see PUT: /passwords/{id}
+ * @param {string} inboxId
+ * @param {{
+ *   name: string|null,
+ *   login: string|null,
+ *   password: string|null,
+ *   color: string|null,
+ *   tags: string[],
+ *   custom: [
+ *      {
+ *          name:  string,
+ *          value: string,
+ *          type:  string
+ *      }
+ *   ],
+ *   attachments: [
+ *       {
+ *           path: string,
+ *           name: string|null
+ *       }
+ *   ]
+ * }} fields
+ * @return {Promise}
+ */
+PassworkAPI.prototype.editInboxPassword = (inboxId, fields = {}) => throw new Error('not implemented');
+
+/**
+ * Get inbox password attachment
+ * @see GET: /passwords/{id}/attachment/{attachmentId}
+ * @param {string} inboxId
+ * @param attachmentId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.getInboxPasswordAttachment = (inboxId, attachmentId) => throw new Error('not implemented');
+
+/**
+ * Attach file to inbox password
+ * @see POST: /passwords/{id}/attachment
+ * @param {string}inboxId
+ * @param {string}attachmentPath
+ * @param {string|null}attachmentName
+ * @return {Promise}
+ */
+PassworkAPI.prototype.addInboxPasswordAttachment = (inboxId, attachmentPath, attachmentName = null) =>
+    throw new Error('not implemented');
+
+/**
+ * Delete inbox password attachment
+ * @see DELETE: /passwords/{id}/attachment/{attachmentId}
+ * @param {string}inboxId
+ * @param {string}attachmentId
+ * @return {Promise}
+ */
+PassworkAPI.prototype.deleteInboxPasswordAttachment = (inboxId, attachmentId) => throw new Error('not implemented');
+
+/**
  * Get inbox count
  * @see GET: /sharing/inbox/count
  * @return {Promise}
