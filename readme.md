@@ -1,3 +1,7 @@
+## Compatibility Warning
+
+**This JavaScript connector is compatible only with Passwork versions up to 6.x.** For Passwork 7.0 and newer, this connector will not function correctly due to API changes. Please migrate to the new official Python connector available at [https://github.com/passwork-me/passwork-python](https://github.com/passwork-me/passwork-python) for full compatibility with Passwork 7.0+. The JavaScript connector is no longer maintained and will not receive updates to support newer Passwork versions
+
 ## About the API
 The Passwork API lets you retrieve, create, update passwords, folders and vaults. It is an easy way how you can integrate Passwork with your infrastructure. Use our Passwork JS Connector to make the integration smoother. The API operates behalf of the user whom API Key is used.
 
